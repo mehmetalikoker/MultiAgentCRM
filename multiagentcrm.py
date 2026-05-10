@@ -75,10 +75,9 @@ with tab1:
             options=[
                 "SMS",
                 "E-posta",
-                "Sosyal Medya",
+                "Mobil Inbound Kampanya",
+                "Şube İçi Inbound Kampanya",
                 "Push Bildirimi",
-                "Web Banner",
-                "Basılı Materyal",
             ]
         )
         st.markdown("<br>", unsafe_allow_html=True)
