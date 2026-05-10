@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python agent/campaigntextagent.py)",
+      "Bash(pip install *)",
+      "Bash(dir /b)",
+      "Bash(.venv/Scripts/pip install *)",
+      "Bash(Get-Content \"C:\\\\Users\\\\Mehmet\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-Mehmet-VSCodeProject-AgenticCRM\\\\7ddd307c-fe76-431b-a918-7f8eb821b404\\\\tasks\\\\bqeajwkyv.output\" -Wait)",
+      "Bash(Select-String -Pattern \"Successfully installed|ERROR|error|already satisfied\" --SimpleMatch)",
+      "Bash(.venv/Scripts/python agent/campaigntextagent.py)",
+      "Bash(.venv/Scripts/python agent/visualcontrolagent.py)",
+      "Bash(.venv/Scripts/python agent/legalstrategyagent.py)",
+      "Bash(.venv/Scripts/streamlit run *)",
+      "Bash(git init *)",
+      "Bash(git remote *)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)"
+    ]
+  }
+}
