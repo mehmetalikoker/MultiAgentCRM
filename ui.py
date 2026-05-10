@@ -4,6 +4,7 @@ import os
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 import streamlit as st
+import tempfile
 
 st.set_page_config(
     page_title="Kampanya Denetim Sistemi",
@@ -55,7 +56,7 @@ with tab1:
         else:
             with st.spinner("Metin denetleniyor..."):
                 try:
-                    from agent.campaigntextagent import app
+                    from agents.campaigntextagent import app
                     result = app.invoke({
                         "campaign_text": campaign_text,
                         "channel": channel
@@ -102,14 +103,13 @@ with tab2:
         else:
             with st.spinner("Görsel denetleniyor..."):
                 try:
-                    import tempfile
                     with tempfile.NamedTemporaryFile(
                         delete=False, suffix=os.path.splitext(uploaded_file.name)[1]
                     ) as tmp:
                         tmp.write(uploaded_file.read())
                         tmp_path = tmp.name
 
-                    from agent.visualcontrolagent import app as visual_app
+                    from agents.visualcontrolagent import app as visual_app
                     result = visual_app.invoke({
                         "campaign_text": approved_text,
                         "image_path": tmp_path
@@ -138,38 +138,64 @@ with tab2:
 # ─── TAB 3: Hukuk & Strateji Denetimi ────────────────────────────────────────
 with tab3:
     st.header("Hukuk & Strateji Denetimi")
-    st.markdown("Metin ve görsel denetim raporlarını girerek BDDK mevzuat kontrolünü başlatın.")
+    st.markdown("Hukuki belgeleri yükleyin, kampanya metni bu belgelere göre denetlenecektir.")
 
-    col_a, col_b = st.columns(2)
-    with col_a:
-        legal_campaign_text = st.text_area(
-            "Kampanya Metni",
-            placeholder="Kampanya metninizi girin...",
-            height=120
-        )
-        compliance_report_input = st.text_area(
-            "Metin Denetim Raporu",
-            placeholder="Metin denetiminden gelen raporu yapıştırın...",
-            height=120
-        )
-    with col_b:
-        visual_report_input = st.text_area(
-            "Görsel Denetim Raporu",
-            placeholder="Görsel denetiminden gelen raporu yapıştırın...",
-            height=120
-        )
+    # Dosya yükleme
+    uploaded_docs = st.file_uploader(
+        "Hukuki Belgeler (PDF veya TXT — birden fazla dosya seçebilirsiniz)",
+        type=["pdf", "txt"],
+        accept_multiple_files=True
+    )
+
+    if uploaded_docs:
+        st.success(f"✅ {len(uploaded_docs)} belge yüklendi: {', '.join(f.name for f in uploaded_docs)}")
+
+    st.markdown("")
+    legal_campaign_text = st.text_area(
+        "Kampanya Metni",
+        placeholder="Hukuki açıdan denetlenecek kampanya metnini girin...",
+        height=140
+    )
 
     if st.button("Hukuki Denetim Yap", type="primary"):
         if not legal_campaign_text.strip():
             st.warning("Lütfen kampanya metnini girin.")
         else:
-            with st.spinner("Hukuki denetim yapılıyor..."):
+            with st.spinner("Belgeler işleniyor ve hukuki denetim yapılıyor..."):
                 try:
-                    from agent.legalstrategyagent import app as legal_app
+                    # Yüklenen dosyalardan metin çıkar
+                    legal_chunks: list[str] = []
+
+                    if uploaded_docs:
+                        from langchain_community.document_loaders import PyPDFLoader, TextLoader
+                        from langchain.text_splitter import RecursiveCharacterTextSplitter
+
+                        splitter = RecursiveCharacterTextSplitter(
+                            chunk_size=800, chunk_overlap=100
+                        )
+
+                        for doc_file in uploaded_docs:
+                            suffix = os.path.splitext(doc_file.name)[1].lower()
+                            with tempfile.NamedTemporaryFile(
+                                delete=False, suffix=suffix
+                            ) as tmp:
+                                tmp.write(doc_file.read())
+                                tmp_path = tmp.name
+
+                            if suffix == ".pdf":
+                                loader = PyPDFLoader(tmp_path)
+                            else:
+                                loader = TextLoader(tmp_path, encoding="utf-8")
+
+                            pages = loader.load()
+                            chunks = splitter.split_documents(pages)
+                            legal_chunks.extend([c.page_content for c in chunks])
+                            os.unlink(tmp_path)
+
+                    from agents.legalstrategyagent import app as legal_app
                     result = legal_app.invoke({
                         "campaign_text": legal_campaign_text,
-                        "compliance_report": compliance_report_input or "Metin raporu girilmedi.",
-                        "visual_report": visual_report_input or "Görsel raporu girilmedi."
+                        "legal_documents": legal_chunks,
                     })
 
                     report = result.get("legal_audit_report", "")
@@ -178,7 +204,7 @@ with tab3:
                     st.markdown("---")
                     st.subheader("Hukuki Denetim Sonucu")
 
-                    col_score, col_empty = st.columns([1, 3])
+                    col_score, col_report = st.columns([1, 3])
                     with col_score:
                         color = "green" if score >= 70 else "orange" if score >= 40 else "red"
                         st.markdown(
@@ -186,9 +212,12 @@ with tab3:
                             f"<p style='text-align:center'>Uygunluk Puanı</p>",
                             unsafe_allow_html=True
                         )
-
-                    st.markdown("**Detaylı Rapor:**")
-                    st.markdown(report)
+                    with col_report:
+                        if uploaded_docs:
+                            st.caption(f"Kaynak belgeler: {', '.join(f.name for f in uploaded_docs)}")
+                        else:
+                            st.caption("Belge yüklenmedi — varsayılan BDDK mevzuatı kullanıldı.")
+                        st.markdown(report)
 
                 except Exception as e:
                     st.error(f"Hata oluştu: {e}")

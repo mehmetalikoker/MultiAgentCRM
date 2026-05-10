@@ -15,7 +15,11 @@
       "Bash(git remote *)",
       "Bash(git add *)",
       "Bash(git commit -m ' *)",
-      "Bash(git push *)"
+      "Bash(git push *)",
+      "Bash(.venv/Scripts/python -c \"import ast; ast.parse\\(open\\('ui.py'\\).read\\(\\)\\); print\\('OK'\\)\")",
+      "Bash(.venv/Scripts/python -c \"import ast; ast.parse\\(open\\('agents/legalstrategyagent.py'\\).read\\(\\)\\); print\\('OK'\\)\")",
+      "Bash(.venv/Scripts/python -c \"import ast; ast.parse\\(open\\('ui.py', encoding='utf-8'\\).read\\(\\)\\); print\\('ui.py OK'\\)\")",
+      "Bash(.venv/Scripts/python -c \"import ast; ast.parse\\(open\\('agents/legalstrategyagent.py', encoding='utf-8'\\).read\\(\\)\\); print\\('legalstrategyagent.py OK'\\)\")"
     ]
   }
 }
