@@ -46,7 +46,7 @@ with st.sidebar:
     if selected_model in _NON_VISION_MODELS:
         st.warning("⚠️ Seçili model görsel denetimi desteklemiyor.")
 
-st.title("🏦 Kampanya Denetim Sistemi")
+st.title("🏦 Multi Agent CRM")
 st.markdown("---")
 
 tab1, tab2, tab3 = st.tabs([
@@ -71,7 +71,7 @@ with tab1:
 
     with col2:
         channel = st.selectbox(
-            "Yayın Kanalı",
+            "Kampanya Kanalı",
             options=[
                 "SMS",
                 "E-posta",
