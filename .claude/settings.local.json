@@ -20,7 +20,9 @@
       "Bash(.venv/Scripts/python -c \"import ast; ast.parse\\(open\\('agents/legalstrategyagent.py'\\).read\\(\\)\\); print\\('OK'\\)\")",
       "Bash(.venv/Scripts/python -c \"import ast; ast.parse\\(open\\('ui.py', encoding='utf-8'\\).read\\(\\)\\); print\\('ui.py OK'\\)\")",
       "Bash(.venv/Scripts/python -c \"import ast; ast.parse\\(open\\('agents/legalstrategyagent.py', encoding='utf-8'\\).read\\(\\)\\); print\\('legalstrategyagent.py OK'\\)\")",
-      "Bash(.venv/Scripts/python -c ' *)"
+      "Bash(.venv/Scripts/python -c ' *)",
+      "Bash(pip show *)",
+      "Bash(Select-String \"Name|Version|not found\")"
     ]
   }
 }

@@ -7,7 +7,7 @@ import io
 from typing import TypedDict, List
 from PIL import Image
 from dotenv import load_dotenv
-from langchain_openai import ChatOpenAI
+from agents.llm_factory import get_llm
 from langgraph.graph import StateGraph, END
 
 load_dotenv()
@@ -31,7 +31,7 @@ def encode_image(image_path):
 
 # --- 2. VISUAL AUDITOR AGENT LOGIC ---
 def visual_auditor(state: AgentState):
-    llm = ChatOpenAI(model=state.get("selected_model", "gpt-4o"), temperature=0)
+    llm = get_llm(state.get("selected_model", "gpt-4o"))
     base64_image = encode_image(state['image_path'])
 
     prompt = f"""
@@ -71,6 +71,7 @@ workflow.add_node("check_visual", visual_auditor)
 workflow.set_entry_point("check_visual")
 workflow.add_edge("check_visual", END)
 
+app = workflow.compile()
+
 if __name__ == "__main__":
-    app = workflow.compile()
     print("Visual Control Agent hazır. Görsel denetimi için image_path sağlayın.")

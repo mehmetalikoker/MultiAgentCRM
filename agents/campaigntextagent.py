@@ -4,7 +4,8 @@ import sys
 sys.stdout.reconfigure(encoding='utf-8')
 from typing import TypedDict, List
 from dotenv import load_dotenv
-from langchain_openai import OpenAIEmbeddings, ChatOpenAI
+from langchain_openai import OpenAIEmbeddings
+from agents.llm_factory import get_llm
 from langchain_community.vectorstores import Chroma
 from langchain_core.prompts import ChatPromptTemplate
 from langgraph.graph import StateGraph, END
@@ -38,7 +39,7 @@ class AgentState(TypedDict):
 
 # --- 3. COMPLIANCE AGENT LOGIC ---
 def compliance_checker(state: AgentState):
-    llm = ChatOpenAI(model=state.get("selected_model", "gpt-4o"), temperature=0)
+    llm = get_llm(state.get("selected_model", "gpt-4o"))
     docs = vectorstore.similarity_search(state['campaign_text'], k=2)
     context = "\n".join([d.page_content for d in docs])
     channel = state.get('channel', 'Belirtilmedi')

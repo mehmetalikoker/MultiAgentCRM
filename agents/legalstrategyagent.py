@@ -4,7 +4,8 @@ sys.stdout.reconfigure(encoding='utf-8')
 
 from typing import TypedDict, List
 from dotenv import load_dotenv
-from langchain_openai import ChatOpenAI, OpenAIEmbeddings
+from langchain_openai import OpenAIEmbeddings
+from agents.llm_factory import get_llm
 from langchain_community.vectorstores import Chroma
 from langgraph.graph import StateGraph, END
 
@@ -28,7 +29,7 @@ class AgentState(TypedDict):
 workflow = StateGraph(AgentState)
 
 def legal_strategy_auditor(state: AgentState):
-    llm = ChatOpenAI(model=state.get("selected_model", "gpt-4o"), temperature=0)
+    llm = get_llm(state.get("selected_model", "gpt-4o"))
     documents = state.get("legal_documents") or []
 
     if documents:

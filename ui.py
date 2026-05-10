@@ -13,11 +13,25 @@ st.set_page_config(
 )
 
 MODELS = {
-    "gpt-4o":          "GPT-4o",
-    "gpt-4o-mini":     "GPT-4o Mini",
-    "gpt-4-turbo":     "GPT-4 Turbo",
-    "gpt-3.5-turbo":   "GPT-3.5 Turbo",
+    # OpenAI
+    "gpt-4o":                    "GPT-4o",
+    "gpt-4o-mini":               "GPT-4o Mini",
+    "gpt-4-turbo":               "GPT-4 Turbo",
+    "gpt-3.5-turbo":             "GPT-3.5 Turbo",
+    # Anthropic
+    "claude-opus-4-7":           "Claude Opus 4.7",
+    "claude-sonnet-4-6":         "Claude Sonnet 4.6",
+    "claude-haiku-4-5-20251001": "Claude Haiku 4.5",
+    # Google Gemini
+    "gemini-2.0-flash":          "Gemini 2.0 Flash",
+    "gemini-1.5-pro":            "Gemini 1.5 Pro",
+    "gemini-1.5-flash":          "Gemini 1.5 Flash",
+    # DeepSeek
+    "deepseek-chat":             "DeepSeek Chat",
 }
+
+# Görsel denetimi desteklemeyen modeller
+_NON_VISION_MODELS = {"gpt-3.5-turbo", "deepseek-chat"}
 
 with st.sidebar:
     st.header("⚙️ Model Ayarları")
@@ -28,8 +42,8 @@ with st.sidebar:
         index=0,
     )
     st.caption(f"Seçili model tüm denetim adımlarında kullanılır.")
-    if selected_model not in ("gpt-4o", "gpt-4-turbo"):
-        st.warning("⚠️ Görsel denetim yalnızca GPT-4o ve GPT-4 Turbo ile çalışır.")
+    if selected_model in _NON_VISION_MODELS:
+        st.warning("⚠️ Seçili model görsel denetimi desteklemiyor.")
 
 st.title("🏦 Kampanya Denetim Sistemi")
 st.markdown("---")
