@@ -119,6 +119,25 @@ with tab2:
     st.header("Görsel Denetim")
     st.markdown("Denetlenecek kampanya görselini ve onaylanmış metni girin.")
 
+    _vision_models = [name for key, name in MODELS.items() if key not in _NON_VISION_MODELS]
+    _non_vision_names = [MODELS[k] for k in _NON_VISION_MODELS if k in MODELS]
+
+    if selected_model in _NON_VISION_MODELS:
+        st.error(
+            f"**{MODELS[selected_model]}** görüntü işlemeyi desteklemiyor. "
+            f"Sol menüden görsel destekli bir model seçin."
+        )
+        st.info(
+            "**Görsel denetim destekleyen modeller:** "
+            + " · ".join(_vision_models)
+        )
+    else:
+        st.info(
+            f"**Aktif model:** {MODELS[selected_model]} &nbsp;·&nbsp; Görsel denetim destekleniyor.  \n"
+            f"Desteklenmeyen modeller: {', '.join(_non_vision_names)}",
+            icon="ℹ️",
+        )
+
     uploaded_file = st.file_uploader(
         "Kampanya Görseli", type=["jpg", "jpeg", "png"]
     )
