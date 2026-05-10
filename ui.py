@@ -12,6 +12,25 @@ st.set_page_config(
     layout="wide"
 )
 
+MODELS = {
+    "gpt-4o":          "GPT-4o",
+    "gpt-4o-mini":     "GPT-4o Mini",
+    "gpt-4-turbo":     "GPT-4 Turbo",
+    "gpt-3.5-turbo":   "GPT-3.5 Turbo",
+}
+
+with st.sidebar:
+    st.header("⚙️ Model Ayarları")
+    selected_model = st.selectbox(
+        "LLM Modeli",
+        options=list(MODELS.keys()),
+        format_func=lambda k: MODELS[k],
+        index=0,
+    )
+    st.caption(f"Seçili model tüm denetim adımlarında kullanılır.")
+    if selected_model not in ("gpt-4o", "gpt-4-turbo"):
+        st.warning("⚠️ Görsel denetim yalnızca GPT-4o ve GPT-4 Turbo ile çalışır.")
+
 st.title("🏦 Kampanya Denetim Sistemi")
 st.markdown("---")
 
@@ -59,7 +78,8 @@ with tab1:
                     from agents.campaigntextagent import app
                     result = app.invoke({
                         "campaign_text": campaign_text,
-                        "channel": channel
+                        "channel": channel,
+                        "selected_model": selected_model,
                     })
 
                     is_safe = result.get("is_safe", False)
@@ -73,7 +93,7 @@ with tab1:
                     else:
                         st.error("❌ Kampanya metninde sorunlar tespit edildi.")
 
-                    st.markdown(f"**Kanal:** `{channel}`")
+                    st.markdown(f"**Kanal:** `{channel}` &nbsp;|&nbsp; **Model:** `{MODELS[selected_model]}`")
                     st.markdown("**Detaylı Rapor:**")
                     st.code(report, language="json")
 
@@ -112,7 +132,8 @@ with tab2:
                     from agents.visualcontrolagent import app as visual_app
                     result = visual_app.invoke({
                         "campaign_text": approved_text,
-                        "image_path": tmp_path
+                        "image_path": tmp_path,
+                        "selected_model": selected_model,
                     })
                     os.unlink(tmp_path)
 
@@ -196,6 +217,7 @@ with tab3:
                     result = legal_app.invoke({
                         "campaign_text": legal_campaign_text,
                         "legal_documents": legal_chunks,
+                        "selected_model": selected_model,
                     })
 
                     report = result.get("legal_audit_report", "")

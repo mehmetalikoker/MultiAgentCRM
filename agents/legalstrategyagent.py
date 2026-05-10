@@ -10,8 +10,6 @@ from langgraph.graph import StateGraph, END
 
 load_dotenv()
 
-llm = ChatOpenAI(model="gpt-4o", temperature=0)
-
 # Fallback: dosya yüklenmezse kullanılacak mock mevzuat
 _fallback_regulations = [
     "BDDK yönetmeliğine göre faiz oranı kampanya görselinde en az 10 punto büyüklüğünde belirtilmelidir.",
@@ -22,13 +20,15 @@ _fallback_regulations = [
 
 class AgentState(TypedDict):
     campaign_text: str
-    legal_documents: List[str]   # Yüklenen dosyalardan çıkarılan metin parçaları
+    selected_model: str
+    legal_documents: List[str]
     legal_audit_report: str
     final_score: int
 
 workflow = StateGraph(AgentState)
 
 def legal_strategy_auditor(state: AgentState):
+    llm = ChatOpenAI(model=state.get("selected_model", "gpt-4o"), temperature=0)
     documents = state.get("legal_documents") or []
 
     if documents:

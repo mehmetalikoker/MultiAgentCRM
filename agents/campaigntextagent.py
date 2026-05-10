@@ -31,14 +31,14 @@ vectorstore = Chroma.from_texts(
 class AgentState(TypedDict):
     campaign_text: str
     channel: str
+    selected_model: str
     compliance_report: str
     is_safe: bool
     suggestions: List[str]
 
 # --- 3. COMPLIANCE AGENT LOGIC ---
-llm = ChatOpenAI(model="gpt-4o", temperature=0)
-
 def compliance_checker(state: AgentState):
+    llm = ChatOpenAI(model=state.get("selected_model", "gpt-4o"), temperature=0)
     docs = vectorstore.similarity_search(state['campaign_text'], k=2)
     context = "\n".join([d.page_content for d in docs])
     channel = state.get('channel', 'Belirtilmedi')
