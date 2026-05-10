@@ -23,9 +23,10 @@ MODELS = {
     "claude-sonnet-4-6":         "Claude Sonnet 4.6",
     "claude-haiku-4-5-20251001": "Claude Haiku 4.5",
     # Google Gemini
-    "gemini-2.0-flash":          "Gemini 2.0 Flash",
-    "gemini-1.5-pro":            "Gemini 1.5 Pro",
-    "gemini-1.5-flash":          "Gemini 1.5 Flash",
+    # "gemini-2.0-flash":          "Gemini 2.0 Flash",
+    # "gemini-1.5-pro":            "Gemini 1.5 Pro",
+    # "gemini-1.5-flash":          "Gemini 1.5 Flash",
+    
     # DeepSeek
     "deepseek-chat":             "DeepSeek Chat",
 }
