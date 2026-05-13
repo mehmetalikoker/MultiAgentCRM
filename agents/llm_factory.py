@@ -10,7 +10,7 @@ def get_llm(model: str, temperature: float = 0):
         return ChatOpenAI(model=model, temperature=temperature)
     elif model.startswith("claude-"):
         from langchain_anthropic import ChatAnthropic
-        return ChatAnthropic(model=model, temperature=temperature)
+        return ChatAnthropic(model=model)
     elif model.startswith("gemini-"):
         from langchain_google_genai import ChatGoogleGenerativeAI
         return ChatGoogleGenerativeAI(model=model, temperature=temperature)

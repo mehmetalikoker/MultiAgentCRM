@@ -5,6 +5,7 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 import streamlit as st
 import tempfile
+import json
 
 st.set_page_config(
     page_title="Kampanya Denetim Sistemi",
@@ -109,7 +110,19 @@ with tab1:
 
                     st.markdown(f"**Kanal:** `{channel}` &nbsp;|&nbsp; **Model:** `{MODELS[selected_model]}`")
                     st.markdown("**Detaylı Rapor:**")
-                    st.code(report, language="json")
+                    try:
+                        clean = report.strip()
+                        if clean.startswith("```"):
+                            parts = clean.split("```")
+                            clean = parts[1].lstrip("json").strip() if len(parts) > 1 else clean
+                        st.json(json.loads(clean))
+                    except (json.JSONDecodeError, ValueError):
+                        st.markdown(
+                            f"<pre style='white-space: pre-wrap; word-wrap: break-word; "
+                            f"background:#f6f8fa; padding:1rem; border-radius:0.5rem; "
+                            f"font-size:0.85rem; overflow-x:hidden;'>{report}</pre>",
+                            unsafe_allow_html=True
+                        )
 
                 except Exception as e:
                     st.error(f"Hata oluştu: {e}")
