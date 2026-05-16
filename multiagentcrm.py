@@ -3,6 +3,7 @@ import sys
 import os
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
+import hashlib
 import streamlit as st
 import tempfile
 import json
@@ -12,6 +13,59 @@ st.set_page_config(
     page_icon="🏦",
     layout="wide"
 )
+
+# ─── KİMLİK DOĞRULAMA ─────────────────────────────────────────────────────────
+
+_USERS_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "users.json")
+
+
+def _load_users() -> dict:
+    if not os.path.exists(_USERS_FILE):
+        return {}
+    with open(_USERS_FILE, "r", encoding="utf-8") as f:
+        data = json.load(f)
+    return {u["username"]: u for u in data.get("users", [])}
+
+
+def _check_credentials(username: str, password: str) -> bool:
+    users = _load_users()
+    user = users.get(username)
+    if not user:
+        return False
+    hashed = hashlib.sha256(password.encode()).hexdigest()
+    return hashed == user["password_hash"]
+
+
+def _show_login():
+    col_left, col_center, col_right = st.columns([1, 1.2, 1])
+    with col_center:
+        st.markdown("<br><br>", unsafe_allow_html=True)
+        st.markdown(
+            "<h2 style='text-align:center'>🏦 Kampanya Denetim Sistemi</h2>",
+            unsafe_allow_html=True,
+        )
+        st.markdown("<p style='text-align:center; color:#888;'>Devam etmek için giriş yapın</p>", unsafe_allow_html=True)
+        st.markdown("<br>", unsafe_allow_html=True)
+
+        with st.form("login_form"):
+            username = st.text_input("Kullanıcı Adı", placeholder="kullanıcı adı")
+            password = st.text_input("Şifre", type="password", placeholder="••••••••")
+            submitted = st.form_submit_button("Giriş Yap", use_container_width=True, type="primary")
+
+        if submitted:
+            if _check_credentials(username, password):
+                users = _load_users()
+                st.session_state["authenticated"] = True
+                st.session_state["username"] = username
+                st.session_state["display_name"] = users[username].get("display_name", username)
+                st.rerun()
+            else:
+                st.error("Kullanıcı adı veya şifre hatalı.")
+
+
+if not st.session_state.get("authenticated"):
+    _show_login()
+    st.stop()
 
 MODELS = {
     # OpenAI
@@ -36,6 +90,12 @@ MODELS = {
 _NON_VISION_MODELS = {"gpt-3.5-turbo", "deepseek-chat"}
 
 with st.sidebar:
+    display_name = st.session_state.get("display_name", st.session_state.get("username", ""))
+    st.markdown(f"👤 **{display_name}** olarak giriş yapıldı")
+    if st.button("Çıkış Yap", use_container_width=True):
+        st.session_state.clear()
+        st.rerun()
+    st.markdown("---")
     st.header("⚙️ Model Ayarları")
     selected_model = st.selectbox(
         "LLM Modeli",
