@@ -1,6 +1,6 @@
 # Agentic CRM — Kampanya Denetim Sistemi
 
-ING Bank kampanyalarının metin, görsel ve hukuki uygunluğunu yapay zeka destekli çoklu ajan mimarisiyle denetleyen bir Streamlit uygulamasıdır.
+Kampanyaların metin, görsel ve hukuki uygunluğunu yapay zeka destekli çoklu ajan mimarisiyle denetleyen bir Streamlit uygulamasıdır.
 
 ---
 
