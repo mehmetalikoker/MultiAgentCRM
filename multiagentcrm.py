@@ -255,17 +255,24 @@ from ui.tab_metin_denetimi import render as render_metin
 from ui.tab_gorsel_denetim import render as render_gorsel
 from ui.tab_hukuk_strateji import render as render_hukuk
 
-tab1, tab2, tab3 = st.tabs([
-    "📝 Metin Denetimi",
-    "🖼️ Görsel Denetim",
-    "⚖️ Hukuk & Strateji Denetimi"
-])
+is_admin = st.session_state.get("username") == "admin"
 
-with tab1:
+tab_labels = ["📝 Metin Denetimi", "🖼️ Görsel Denetim", "⚖️ Hukuk & Strateji Denetimi"]
+if is_admin:
+    tab_labels.append("⚙️ Yönetim Paneli")
+
+tabs = st.tabs(tab_labels)
+
+with tabs[0]:
     render_metin(selected_model, MODELS)
 
-with tab2:
+with tabs[1]:
     render_gorsel(selected_model, MODELS, _NON_VISION_MODELS)
 
-with tab3:
+with tabs[2]:
     render_hukuk(selected_model)
+
+if is_admin:
+    from ui.tab_yonetim_paneli import render as render_yonetim
+    with tabs[3]:
+        render_yonetim()
