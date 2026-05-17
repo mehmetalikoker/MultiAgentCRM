@@ -8,3 +8,4 @@ __pycache__/
 chroma_db/
 .streamlit/
 user/
+.claude/settings.local.json
