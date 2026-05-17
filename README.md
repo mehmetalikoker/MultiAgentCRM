@@ -82,7 +82,7 @@ AgenticCRM/
 
 ```bash
 # 1. Repoyu klonlayın
-git clone <repo-url>
+git clone https://github.com/mehmetalikoker/MultiAgentCRM
 cd AgenticCRM
 
 # 2. Sanal ortam oluşturun ve aktif edin
@@ -145,6 +145,21 @@ Uygulama açıldığında login ekranı gelir. Varsayılan admin hesabı için:
 
 Proje dizininde user klasorü içine user.json dosyası oluşturarak kullanabilirsiniz.
 
+## Kullanıcı Yönetimi
+
+Kullanıcılar `user/users.json` dosyasında tutulur. Şifreler SHA-256 ile hashlenerek saklanır.
+
+```json
+{
+  "users": [
+    {
+      "username": "admin",
+      "password_hash": "<sha256>",
+      "display_name": "Yönetici"
+    }
+  ]
+}
+```
 
 ### Tab 1 — Metin Denetimi
 
@@ -206,22 +221,6 @@ Belge yüklenmezse sistem varsayılan BDDK mevzuatını kullanır. Sonuç olarak
 Sidebar'dan aktif model seçilir; seçim tüm denetim adımlarına uygulanır.
 
 ---
-
-## Kullanıcı Yönetimi
-
-Kullanıcılar `user/users.json` dosyasında tutulur. Şifreler SHA-256 ile hashlenerek saklanır.
-
-```json
-{
-  "users": [
-    {
-      "username": "admin",
-      "password_hash": "<sha256>",
-      "display_name": "Yönetici"
-    }
-  ]
-}
-```
 
 Manuel olarak şifre hash'i üretmek için:
 
