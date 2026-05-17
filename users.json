@@ -4,6 +4,11 @@
       "username": "admin",
       "password_hash": "240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9",
       "display_name": "Yönetici"
+    },
+    {
+      "username": "iguldag",
+      "password_hash": "f6b0518aaccb06a58a664e688479d61c9f9ca07d1c83f472094b51be88656d75",
+      "display_name": "İrem Güldag Ercan"
     }
   ]
 }
