@@ -28,11 +28,15 @@ class TestGetLlm:
         mock_module = MagicMock()
         mock_module.ChatGoogleGenerativeAI.return_value = mock_instance
         with patch.dict("sys.modules", {"langchain_google_genai": mock_module}):
-            import importlib, agents.llm_factory as llm_mod
-            importlib.reload(llm_mod)
-            result = llm_mod.get_llm("gemini-1.5-pro")
-            mock_module.ChatGoogleGenerativeAI.assert_called_once_with(model="gemini-1.5-pro", temperature=0)
-            assert result is mock_instance
+            with patch.dict("os.environ", {"GEMINI_API_KEY": "test-gemini-key"}):
+                import importlib, agents.llm_factory as llm_mod
+                importlib.reload(llm_mod)
+                result = llm_mod.get_llm("gemini-1.5-pro")
+                call_kwargs = mock_module.ChatGoogleGenerativeAI.call_args.kwargs
+                assert call_kwargs["model"] == "gemini-1.5-pro"
+                assert call_kwargs["temperature"] == 0
+                assert call_kwargs["google_api_key"] == "test-gemini-key"
+                assert result is mock_instance
 
     def test_deepseek_model_uses_openai_with_custom_base_url(self):
         mock_instance = MagicMock()
