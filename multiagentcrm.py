@@ -169,7 +169,7 @@ def _show_login():
     with col_center:
         st.markdown("""
         <div class="ing-login-card">
-            <div class="ing-login-title">Kampanya Denetim Sistemi</div>
+            <div class="ing-login-title">Agentic CRM</div>
             <div class="ing-login-sub">Devam etmek için kurumsal hesabınızla giriş yapın</div>
         </div>
         """, unsafe_allow_html=True)
@@ -225,11 +225,6 @@ MODELS = {
 _NON_VISION_MODELS = {"gpt-3.5-turbo", "deepseek-chat"}
 
 with st.sidebar:
-    st.markdown(
-        "<div style='font-size:0.72rem;color:#aaa;padding:8px 0 12px;letter-spacing:0.5px;'>"
-        "KAMPANYA DENETİM SİSTEMİ</div>",
-        unsafe_allow_html=True
-    )
     st.markdown("---")
     display_name = st.session_state.get("display_name", st.session_state.get("username", ""))
     st.markdown(f"<span style='font-size:0.85rem;color:#ccc;'>👤 {display_name} olarak giriş yapıldı</span>",
@@ -249,10 +244,10 @@ with st.sidebar:
     st.caption(f"Seçili model tüm denetim adımlarında kullanılır.")
     if selected_model in _NON_VISION_MODELS:
         st.warning("⚠️ Seçili model görsel denetimi desteklemiyor.")
-
+    st.markdown("---")
 st.markdown(
     "<h1 style='color:#1c1c1c; font-size:2.4rem; border-bottom: 3px solid #FF6200; "
-    "padding-bottom:10px; display:block;'>Kampanya Denetim Sistemi</h1>",
+    "padding-bottom:10px; display:block;'>Agentic CRM</h1>",
     unsafe_allow_html=True
 )
 st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
