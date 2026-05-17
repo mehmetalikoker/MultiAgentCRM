@@ -169,7 +169,7 @@ def _show_login():
     with col_center:
         st.markdown("""
         <div class="ing-login-card">
-            <div class="ing-login-title">Agentic CRM</div>
+            <div class="ing-login-title"><span style="color:#FF6200;">Agentic CRM</span></div>
             <div class="ing-login-sub">Devam etmek için kurumsal hesabınızla giriş yapın</div>
         </div>
         """, unsafe_allow_html=True)
@@ -246,7 +246,7 @@ with st.sidebar:
         st.warning("⚠️ Seçili model görsel denetimi desteklemiyor.")
     st.markdown("---")
 st.markdown(
-    "<h1 style='color:#1c1c1c; font-size:2.4rem; border-bottom: 3px solid #FF6200; "
+    "<h1 style='color:#FF6200; font-size:2.4rem; border-bottom: 3px solid #FF6200; "
     "padding-bottom:10px; display:block;'>Agentic CRM</h1>",
     unsafe_allow_html=True
 )
