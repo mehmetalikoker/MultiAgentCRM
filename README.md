@@ -141,14 +141,10 @@ Tarayıcıda `http://localhost:8501` adresini açın.
 
 ### Giriş
 
-Uygulama açıldığında login ekranı gelir. Varsayılan admin hesabı:
+Uygulama açıldığında login ekranı gelir. Varsayılan admin hesabı için:
 
-| Alan | Değer |
-|---|---|
-| Kullanıcı Adı | `admin` |
-| Şifre | `admin123` |
+Proje dizininde user klasorü içine user.json dosyası oluşturarak kullanabilirsiniz.
 
-> İlk girişten sonra admin şifresini **Yönetim Paneli** üzerinden değiştirmeniz önerilir.
 
 ### Tab 1 — Metin Denetimi
 
