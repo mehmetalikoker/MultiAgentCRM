@@ -143,7 +143,7 @@ input:focus, textarea:focus {
 
 # ─── KİMLİK DOĞRULAMA ─────────────────────────────────────────────────────────
 
-_USERS_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "users.json")
+_USERS_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "user", "users.json")
 
 
 def _load_users() -> dict:
