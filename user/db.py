@@ -2,111 +2,38 @@
 import os
 import json
 import hashlib
-import requests
 
 _USERS_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "users.json")
 
 
-def _supabase_config():
-    try:
-        import streamlit as st
-        url = st.secrets.get("SUPABASE_URL") or os.getenv("SUPABASE_URL")
-        key = st.secrets.get("SUPABASE_KEY") or os.getenv("SUPABASE_KEY")
-    except Exception:
-        url = os.getenv("SUPABASE_URL")
-        key = os.getenv("SUPABASE_KEY")
-    return url, key
+def load_users() -> dict:
+    if not os.path.exists(_USERS_FILE):
+        return {}
+    with open(_USERS_FILE, "r", encoding="utf-8") as f:
+        return {u["username"]: u for u in json.load(f).get("users", [])}
 
 
-def _base_url(url: str) -> str:
-    url = url.rstrip("/")
-    if not url.endswith("/rest/v1"):
-        url = f"{url}/rest/v1"
-    return url
-
-
-def _headers(key: str) -> dict:
-    return {
-        "apikey": key,
-        "Authorization": f"Bearer {key}",
-        "Content-Type": "application/json",
-    }
-
-
-def _local_load_list() -> list:
-    if os.path.exists(_USERS_FILE):
-        with open(_USERS_FILE, "r", encoding="utf-8") as f:
-            return json.load(f).get("users", [])
-    try:
-        import streamlit as st
-        return [dict(u) for u in st.secrets.get("users", [])]
-    except Exception:
+def load_users_list() -> list:
+    if not os.path.exists(_USERS_FILE):
         return []
+    with open(_USERS_FILE, "r", encoding="utf-8") as f:
+        return json.load(f).get("users", [])
 
 
-def _local_save_list(users: list):
+def _save(users: list):
     with open(_USERS_FILE, "w", encoding="utf-8") as f:
         json.dump({"users": users}, f, ensure_ascii=False, indent=2)
 
 
-def _check_resp(resp: requests.Response):
-    if not resp.ok:
-        import streamlit as st
-        st.error(f"Supabase hata {resp.status_code}: {resp.text}")
-        st.stop()
-
-
-def load_users() -> dict:
-    url, key = _supabase_config()
-    if url and key:
-        resp = requests.get(
-            f"{_base_url(url)}/crm_users",
-            headers={**_headers(key), "Accept": "application/json"},
-            params={"select": "username,password_hash,display_name"},
-        )
-        _check_resp(resp)
-        return {u["username"]: u for u in resp.json()}
-    return {u["username"]: u for u in _local_load_list()}
-
-
-def load_users_list() -> list:
-    url, key = _supabase_config()
-    if url and key:
-        resp = requests.get(
-            f"{_base_url(url)}/crm_users",
-            headers={**_headers(key), "Accept": "application/json"},
-            params={"select": "username,password_hash,display_name"},
-        )
-        _check_resp(resp)
-        return resp.json()
-    return _local_load_list()
-
-
 def add_user(username: str, password: str, display_name: str) -> None:
-    password_hash = hashlib.sha256(password.encode()).hexdigest()
-    url, key = _supabase_config()
-    if url and key:
-        resp = requests.post(
-            f"{_base_url(url)}/crm_users",
-            headers=_headers(key),
-            json={"username": username, "password_hash": password_hash, "display_name": display_name or username},
-        )
-        _check_resp(resp)
-        return
-    users = _local_load_list()
-    users.append({"username": username, "password_hash": password_hash, "display_name": display_name or username})
-    _local_save_list(users)
+    users = load_users_list()
+    users.append({
+        "username": username,
+        "password_hash": hashlib.sha256(password.encode()).hexdigest(),
+        "display_name": display_name or username,
+    })
+    _save(users)
 
 
 def delete_user(username: str) -> None:
-    url, key = _supabase_config()
-    if url and key:
-        resp = requests.delete(
-            f"{_base_url(url)}/crm_users",
-            headers=_headers(key),
-            params={"username": f"eq.{username}"},
-        )
-        _check_resp(resp)
-        return
-    users = [u for u in _local_load_list() if u["username"] != username]
-    _local_save_list(users)
+    _save([u for u in load_users_list() if u["username"] != username])
