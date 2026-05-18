@@ -4,13 +4,20 @@ sys.stdout.reconfigure(encoding='utf-8')
 
 import base64
 import os
+from pathlib import Path
 from typing import TypedDict, List
 from dotenv import load_dotenv
 from agents.llm_factory import get_llm
+from agents.security import sanitize_input, wrap_user_content, build_safe_system_message
 from langchain_core.messages import HumanMessage, SystemMessage
 from langgraph.graph import StateGraph, END
 
 load_dotenv()
+
+_PROMPT_DIR = Path(__file__).parent / "prompts"
+
+def _load_prompt(name: str) -> str:
+    return (_PROMPT_DIR / name).read_text(encoding="utf-8")
 
 class AgentState(TypedDict):
     campaign_text: str
@@ -38,26 +45,14 @@ def visual_auditor(state: AgentState):
     llm = get_llm(state.get("selected_model", "gpt-4o"))
     base64_image, mime_type = encode_image(state["image_path"])
 
-    prompt = f"""
-Sen bir Banka Görsel Denetçisisin.
-Sana verilen kampanya görselini ve onaylanmış kampanya metnini karşılaştır.
+    safe_text = sanitize_input(state["campaign_text"])
+    wrapped_text = wrap_user_content(safe_text)
 
-ONAYLANAN METİN: {state['campaign_text']}
-
-GÖREVİN:
-1. Görsel üzerindeki metinleri oku (OCR) ve onaylanan metinle tutarlı mı bak.
-2. Banka logosu görünüyor mu ve konumu uygun mu?
-3. Renk paleti ve tasarım genel bankacılık ciddiyetine uygun mu?
-4. Görselde yanıltıcı bir öğe (metinden farklı bir faiz oranı vb.) var mı?
-
-Yanıtını şu formatta ver:
-- Görsel Analizi: (Genel açıklama)
-- Tutarsızlıklar: (Varsa metin-görsel farkları)
-- Tasarım Önerileri: (Daha iyi olması için öneriler)
-"""
+    template = _load_prompt("visual_control.txt")
+    prompt = template.format(campaign_text=wrapped_text)
 
     messages = [
-        SystemMessage(content="Sen uzman bir banka görsel denetçisisin."),
+        SystemMessage(content=build_safe_system_message()),
         HumanMessage(content=[
             {"type": "text", "text": prompt},
             {"type": "image_url", "image_url": {"url": f"data:{mime_type};base64,{base64_image}"}},

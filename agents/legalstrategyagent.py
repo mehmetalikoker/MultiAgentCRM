@@ -2,14 +2,21 @@
 import sys
 sys.stdout.reconfigure(encoding='utf-8')
 
+from pathlib import Path
 from typing import TypedDict, List
 from dotenv import load_dotenv
 from langchain_openai import OpenAIEmbeddings
 from agents.llm_factory import get_llm
+from agents.security import sanitize_input, wrap_user_content
 from langchain_community.vectorstores import Chroma
 from langgraph.graph import StateGraph, END
 
 load_dotenv()
+
+_PROMPT_DIR = Path(__file__).parent / "prompts"
+
+def _load_prompt(name: str) -> str:
+    return (_PROMPT_DIR / name).read_text(encoding="utf-8")
 
 # Fallback: dosya yüklenmezse kullanılacak mock mevzuat
 _fallback_regulations = [
@@ -32,6 +39,9 @@ def legal_strategy_auditor(state: AgentState):
     llm = get_llm(state.get("selected_model", "gpt-4o"))
     documents = state.get("legal_documents") or []
 
+    safe_text = sanitize_input(state["campaign_text"])
+    wrapped_text = wrap_user_content(safe_text)
+
     if documents:
         vs = Chroma.from_texts(
             texts=documents,
@@ -45,30 +55,11 @@ def legal_strategy_auditor(state: AgentState):
             collection_name="fallback_legal",
         )
 
-    hits = vs.similarity_search(state["campaign_text"], k=5)
+    hits = vs.similarity_search(safe_text, k=5)
     legal_context = "\n\n".join([d.page_content for d in hits])
 
-    prompt = f"""
-Sen bir Banka Hukuk ve Strateji Denetçisisin.
-Aşağıdaki kampanya metnini, sana verilen yasal kaynaklara göre denetle.
-
-YASAL KAYNAKLAR:
-{legal_context}
-
-KAMPANYA METNİ:
-{state['campaign_text']}
-
-GÖREVİN:
-1. Kampanya metninde yasal kaynaklara aykırı ifade var mı?
-2. Tüketiciyi koruma açısından risk oluşturan bir durum var mı?
-3. Yasal Uygunluk Puanını (0-100) belirle.
-
-Yanıtını şu başlıklarla ver:
-- Mevzuat İhlalleri:
-- Risk Seviyesi (Düşük/Orta/Yüksek):
-- Gerekli Yasal Düzenlemeler:
-- Final Uygunluk Puanı: <sadece sayı>
-"""
+    template = _load_prompt("legal_strategy.txt")
+    prompt = template.format(legal_context=legal_context, campaign_text=wrapped_text)
 
     response = llm.invoke(prompt)
     content = response.content

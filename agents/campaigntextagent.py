@@ -2,16 +2,24 @@
 import os
 import sys
 sys.stdout.reconfigure(encoding='utf-8')
+from pathlib import Path
 from typing import TypedDict, List
 from dotenv import load_dotenv
 from langchain_openai import OpenAIEmbeddings
 from agents.llm_factory import get_llm
+from agents.security import sanitize_input, wrap_user_content
 from langchain_community.vectorstores import Chroma
 from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.messages import SystemMessage
 from langgraph.graph import StateGraph, END
 
 
 load_dotenv()
+
+_PROMPT_DIR = Path(__file__).parent / "prompts"
+
+def _load_prompt(name: str) -> str:
+    return (_PROMPT_DIR / name).read_text(encoding="utf-8")
 
 # --- 1. RAG: MEVZUAT VERİTABANI (MOCK) ---
 # Gerçekte burası PDF'lerden veya banka rehberinden beslenecek
@@ -40,31 +48,23 @@ class AgentState(TypedDict):
 # --- 3. COMPLIANCE AGENT LOGIC ---
 def compliance_checker(state: AgentState):
     llm = get_llm(state.get("selected_model", "gpt-4o"))
-    docs = vectorstore.similarity_search(state['campaign_text'], k=2)
+
+    safe_text = sanitize_input(state['campaign_text'])
+    wrapped_text = wrap_user_content(safe_text)
+
+    docs = vectorstore.similarity_search(safe_text, k=2)
     context = "\n".join([d.page_content for d in docs])
     channel = state.get('channel', 'Belirtilmedi')
 
-    prompt = ChatPromptTemplate.from_template("""
-    Sen bir banka uyum (compliance) uzmanısın.
-    Aşağıdaki kampanya metnini, verilen bankacılık kurallarına göre denetle.
-
-    KANAL: {channel}
-    KURALLAR:
-    {context}
-
-    KAMPANYA METNİ:
-    {campaign_text}
-
-    Yanıtını şu JSON formatında ver:
-    {{
-        "is_safe": bool (Hata yoksa true),
-        "report": "Hataların analizi",
-        "suggestions": ["Öneri 1", "Öneri 2"]
-    }}
-    """)
+    template = _load_prompt("compliance.txt")
+    prompt = ChatPromptTemplate.from_template(template)
 
     chain = prompt | llm
-    response = chain.invoke({"context": context, "campaign_text": state['campaign_text'], "channel": channel})
+    response = chain.invoke({
+        "context": context,
+        "campaign_text": wrapped_text,
+        "channel": channel,
+    })
     
     # Not: Gerçekte bir JSON parser kullanmak daha sağlıklı olur
     # Şimdilik doğrudan state'e yazıyoruz
