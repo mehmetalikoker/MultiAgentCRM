@@ -16,6 +16,7 @@ Kampanyaların metin, görsel ve hukuki uygunluğunu yapay zeka destekli çoklu 
 - [Kullanıcı Yönetimi](#kullanıcı-yönetimi)
 - [Testler](#testler)
 - [Teknoloji Yığını](#teknoloji-yığını)
+- [Görseller](#görseller)
 
 ---
 
@@ -269,3 +270,11 @@ Test kapsamı:
 | Görsel İşleme | Pillow 12 |
 | Kimlik Doğrulama | SHA-256 + JSON |
 | Test | pytest 9 |
+
+## Görseller
+<img width="1025" height="510" alt="Ekran görüntüsü 2026-05-17 152804" src="https://github.com/user-attachments/assets/f1ef81d3-4c37-4e06-9934-81cb463411c5" />
+
+<img width="1888" height="424" alt="Ekran görüntüsü 2026-05-17 152420" src="https://github.com/user-attachments/assets/fa0ea0f6-a7f6-4ce4-8b45-5a481aa5fd8f" />
+
+
+
