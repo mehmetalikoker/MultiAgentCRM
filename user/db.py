@@ -11,10 +11,10 @@ def _supabase_config():
     try:
         import streamlit as st
         url = st.secrets.get("SUPABASE_URL") or os.getenv("SUPABASE_URL")
-        key = st.secrets.get("SUPABASE_KEY") or os.getenv("SUPABASE_KEY")
+        key = st.secrets.get("SUPABASE_SERVICE_KEY") or os.getenv("SUPABASE_SERVICE_KEY")
     except Exception:
         url = os.getenv("SUPABASE_URL")
-        key = os.getenv("SUPABASE_KEY")
+        key = os.getenv("SUPABASE_SERVICE_KEY")
     return url, key
 
 
@@ -42,6 +42,13 @@ def _local_save_list(users: list):
         json.dump({"users": users}, f, ensure_ascii=False, indent=2)
 
 
+def _check_resp(resp: requests.Response):
+    if not resp.ok:
+        import streamlit as st
+        st.error(f"Supabase hata {resp.status_code}: {resp.text}")
+        st.stop()
+
+
 def load_users() -> dict:
     url, key = _supabase_config()
     if url and key:
@@ -50,7 +57,7 @@ def load_users() -> dict:
             headers={**_headers(key), "Accept": "application/json"},
             params={"select": "username,password_hash,display_name"},
         )
-        resp.raise_for_status()
+        _check_resp(resp)
         return {u["username"]: u for u in resp.json()}
     return {u["username"]: u for u in _local_load_list()}
 
@@ -63,7 +70,7 @@ def load_users_list() -> list:
             headers={**_headers(key), "Accept": "application/json"},
             params={"select": "username,password_hash,display_name"},
         )
-        resp.raise_for_status()
+        _check_resp(resp)
         return resp.json()
     return _local_load_list()
 
@@ -77,7 +84,7 @@ def add_user(username: str, password: str, display_name: str) -> None:
             headers=_headers(key),
             json={"username": username, "password_hash": password_hash, "display_name": display_name or username},
         )
-        resp.raise_for_status()
+        _check_resp(resp)
         return
     users = _local_load_list()
     users.append({"username": username, "password_hash": password_hash, "display_name": display_name or username})
@@ -92,7 +99,7 @@ def delete_user(username: str) -> None:
             headers=_headers(key),
             params={"username": f"eq.{username}"},
         )
-        resp.raise_for_status()
+        _check_resp(resp)
         return
     users = [u for u in _local_load_list() if u["username"] != username]
     _local_save_list(users)
