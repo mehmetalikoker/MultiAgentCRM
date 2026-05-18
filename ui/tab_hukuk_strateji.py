@@ -5,10 +5,8 @@ import streamlit as st
 from agents.audit_logger import log_audit
 
 
-def render(selected_model: str, env_ready: bool = True):
+def render(selected_model: str):
     st.header("Hukuk & Strateji Denetimi")
-    if not env_ready:
-        st.warning("⚠️ Gerekli API key'leri eksik. Sol menüden kontrol edin.")
     st.markdown("Hukuki belgeleri yükleyin, kampanya metni bu belgelere göre denetlenecektir.")
 
     uploaded_docs = st.file_uploader(
@@ -27,7 +25,7 @@ def render(selected_model: str, env_ready: bool = True):
         height=140,
     )
 
-    if st.button("Hukuki Denetim Yap", type="primary", disabled=not env_ready):
+    if st.button("Hukuki Denetim Yap", type="primary"):
         if not legal_campaign_text.strip():
             st.warning("Lütfen kampanya metnini girin.")
         else:

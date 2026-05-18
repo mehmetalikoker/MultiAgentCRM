@@ -246,14 +246,6 @@ with st.sidebar:
     if selected_model in _NON_VISION_MODELS:
         st.warning("⚠️ Seçili model görsel denetimi desteklemiyor.")
 
-    from agents.env_check import missing_keys, is_ready
-    _missing = missing_keys(selected_model)
-    env_ready = is_ready(selected_model)
-    if _missing:
-        st.error("🔑 Eksik API key:\n\n" + "\n".join(f"- `{k}`" for k in _missing))
-        st.caption("Denetim yapabilmek için `.env` dosyasına ekleyin.")
-    else:
-        st.success("✅ API bağlantıları hazır")
     st.markdown("---")
 st.markdown(
     "<h1 style='color:#FF6200; font-size:2.4rem; border-bottom: 3px solid #FF6200; "
@@ -276,13 +268,13 @@ if is_admin:
 tabs = st.tabs(tab_labels)
 
 with tabs[0]:
-    render_metin(selected_model, MODELS, env_ready)
+    render_metin(selected_model, MODELS)
 
 with tabs[1]:
-    render_gorsel(selected_model, MODELS, _NON_VISION_MODELS, env_ready)
+    render_gorsel(selected_model, MODELS, _NON_VISION_MODELS)
 
 with tabs[2]:
-    render_hukuk(selected_model, env_ready)
+    render_hukuk(selected_model)
 
 if is_admin:
     from ui.tab_gecmis import render as render_gecmis

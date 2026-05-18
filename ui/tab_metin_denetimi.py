@@ -4,10 +4,8 @@ import streamlit as st
 from agents.audit_logger import log_audit
 
 
-def render(selected_model: str, models: dict, env_ready: bool = True):
+def render(selected_model: str, models: dict):
     st.header("Kampanya Metin Denetimi")
-    if not env_ready:
-        st.warning("⚠️ Gerekli API key'leri eksik. Sol menüden kontrol edin.")
     st.markdown("Kampanya metninizi girin ve hangi kanalda yayınlanacağını seçin.")
 
     col1, col2 = st.columns([3, 1])
@@ -31,7 +29,7 @@ def render(selected_model: str, models: dict, env_ready: bool = True):
             ],
         )
         st.markdown("<br>", unsafe_allow_html=True)
-        run_btn = st.button("Denetle", type="primary", use_container_width=True, disabled=not env_ready)
+        run_btn = st.button("Denetle", type="primary", use_container_width=True)
 
     if run_btn:
         if not campaign_text.strip():
