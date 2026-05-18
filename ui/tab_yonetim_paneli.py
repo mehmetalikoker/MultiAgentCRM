@@ -1,29 +1,13 @@
 # -*- coding: utf-8 -*-
-import hashlib
-import json
-import os
 import streamlit as st
-
-_USERS_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "user", "users.json")
-
-
-def _load_raw() -> list:
-    if not os.path.exists(_USERS_FILE):
-        return []
-    with open(_USERS_FILE, "r", encoding="utf-8") as f:
-        return json.load(f).get("users", [])
-
-
-def _save_raw(users: list):
-    with open(_USERS_FILE, "w", encoding="utf-8") as f:
-        json.dump({"users": users}, f, ensure_ascii=False, indent=2)
+from user.db import load_users_list, add_user, delete_user
 
 
 def render():
     st.header("Yönetim Paneli")
     st.markdown("Kullanıcı hesaplarını buradan yönetebilirsiniz.")
 
-    users = _load_raw()
+    users = load_users_list()
 
     # ── Mevcut kullanıcılar tablosu ───────────────────────────────────────────
     st.subheader("Mevcut Kullanıcılar")
@@ -43,8 +27,7 @@ def render():
                                 unsafe_allow_html=True)
                 else:
                     if st.button("Sil", key=f"del_{i}", type="secondary"):
-                        users = [x for x in users if x["username"] != u["username"]]
-                        _save_raw(users)
+                        delete_user(u["username"])
                         st.success(f"'{u['username']}' silindi.")
                         st.rerun()
 
@@ -70,11 +53,6 @@ def render():
         elif any(u["username"] == new_username.strip() for u in users):
             st.error(f"'{new_username}' kullanıcı adı zaten mevcut.")
         else:
-            users.append({
-                "username": new_username.strip(),
-                "password_hash": hashlib.sha256(new_password.encode()).hexdigest(),
-                "display_name": new_display.strip() or new_username.strip(),
-            })
-            _save_raw(users)
+            add_user(new_username.strip(), new_password, new_display.strip())
             st.success(f"'{new_username}' başarıyla eklendi.")
             st.rerun()

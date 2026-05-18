@@ -4,7 +4,6 @@ import os
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 import hashlib
-import json
 import streamlit as st
 
 st.set_page_config(
@@ -143,23 +142,11 @@ input:focus, textarea:focus {
 
 # ─── KİMLİK DOĞRULAMA ─────────────────────────────────────────────────────────
 
-_USERS_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "user", "users.json")
-
-
-def _load_users() -> dict:
-    if os.path.exists(_USERS_FILE):
-        with open(_USERS_FILE, "r", encoding="utf-8") as f:
-            data = json.load(f)
-        return {u["username"]: u for u in data.get("users", [])}
-    # Streamlit Cloud: secrets'tan oku
-    try:
-        return {u["username"]: dict(u) for u in st.secrets["users"]}
-    except Exception:
-        return {}
+from user.db import load_users
 
 
 def _check_credentials(username: str, password: str) -> bool:
-    users = _load_users()
+    users = load_users()
     user = users.get(username)
     if not user:
         return False
@@ -192,7 +179,7 @@ def _show_login():
 
         if submitted:
             if _check_credentials(username, password):
-                users = _load_users()
+                users = load_users()
                 st.session_state["authenticated"] = True
                 st.session_state["username"] = username
                 st.session_state["display_name"] = users[username].get("display_name", username)
