@@ -5,8 +5,10 @@ import streamlit as st
 from agents.audit_logger import log_audit
 
 
-def render(selected_model: str, models: dict, non_vision_models: set):
+def render(selected_model: str, models: dict, non_vision_models: set, env_ready: bool = True):
     st.header("Görsel Denetim")
+    if not env_ready:
+        st.warning("⚠️ Gerekli API key'leri eksik. Sol menüden kontrol edin.")
     st.markdown("Denetlenecek kampanya görselini ve onaylanmış metni girin.")
 
     vision_model_names = [name for key, name in models.items() if key not in non_vision_models]
@@ -33,7 +35,7 @@ def render(selected_model: str, models: dict, non_vision_models: set):
         height=120,
     )
 
-    if st.button("Görseli Denetle", type="primary"):
+    if st.button("Görseli Denetle", type="primary", disabled=not env_ready):
         if not uploaded_file:
             st.warning("Lütfen bir görsel yükleyin.")
         elif not approved_text.strip():
