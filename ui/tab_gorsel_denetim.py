@@ -2,6 +2,7 @@
 import os
 import tempfile
 import streamlit as st
+from agents.audit_logger import log_audit
 
 
 def render(selected_model: str, models: dict, non_vision_models: set):
@@ -70,6 +71,15 @@ def render(selected_model: str, models: dict, non_vision_models: set):
                             st.error("❌ Görselde sorunlar tespit edildi.")
                         st.markdown("**Detaylı Rapor:**")
                         st.markdown(report)
+
+                    log_audit(
+                        username=st.session_state.get("username", "unknown"),
+                        agent="visual",
+                        model=selected_model,
+                        campaign_text=approved_text,
+                        is_safe=is_visual_safe,
+                        result_summary=report[:500],
+                    )
 
                 except Exception as e:
                     st.error(f"Hata oluştu: {e}")

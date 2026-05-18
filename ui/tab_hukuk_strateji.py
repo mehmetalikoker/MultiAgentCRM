@@ -2,6 +2,7 @@
 import os
 import tempfile
 import streamlit as st
+from agents.audit_logger import log_audit
 
 
 def render(selected_model: str):
@@ -78,6 +79,15 @@ def render(selected_model: str):
                         else:
                             st.caption("Belge yüklenmedi — varsayılan BDDK mevzuatı kullanıldı.")
                         st.markdown(report)
+
+                    log_audit(
+                        username=st.session_state.get("username", "unknown"),
+                        agent="legal",
+                        model=selected_model,
+                        campaign_text=legal_campaign_text,
+                        score=score,
+                        result_summary=report[:500],
+                    )
 
                 except Exception as e:
                     st.error(f"Hata oluştu: {e}")

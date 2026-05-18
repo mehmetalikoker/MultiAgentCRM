@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import json
 import streamlit as st
+from agents.audit_logger import log_audit
 
 
 def render(selected_model: str, models: dict):
@@ -83,6 +84,16 @@ def render(selected_model: str, models: dict):
                             f"font-size:0.85rem; overflow-x:hidden;'>{report}</pre>",
                             unsafe_allow_html=True,
                         )
+
+                    log_audit(
+                        username=st.session_state.get("username", "unknown"),
+                        agent="compliance",
+                        model=selected_model,
+                        campaign_text=campaign_text,
+                        channel=channel,
+                        is_safe=is_safe,
+                        result_summary=parsed_report.get("report", "") if parsed_report else report[:500],
+                    )
 
                 except Exception as e:
                     st.error(f"Hata oluştu: {e}")

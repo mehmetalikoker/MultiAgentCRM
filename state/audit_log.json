@@ -1,0 +1,13 @@
+[
+  {
+    "timestamp": "2026-05-18T06:43:42",
+    "username": "admin",
+    "agent": "compliance",
+    "model": "claude-opus-4-7",
+    "channel": "SMS",
+    "campaign_text_preview": "merhaba",
+    "is_safe": true,
+    "score": null,
+    "result_summary": "Denetlenen metin sadece 'merhaba' selamlamasından ibarettir. Bankacılık kurallarına aykırı herhangi bir ifade ('Bedava' vb. yasaklı kelime) tespit edilmemiştir. Ancak metin, bir kampanya mesajı olarak değerlendirildiğinde içerik bakımından oldukça yetersizdir; kampanya konusu, koşulları, hedef kitle ve yasal zorunlu ibareler (örneğin gönderici banka adı, ticari elektronik ileti reddi için IYS/B001 bilgisi vb.) bulunmamaktadır."
+  }
+]

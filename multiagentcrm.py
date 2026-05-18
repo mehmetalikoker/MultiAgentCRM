@@ -261,6 +261,7 @@ is_admin = st.session_state.get("username") == "admin"
 
 tab_labels = ["📝 Metin Denetimi", "🖼️ Görsel Denetim", "⚖️ Hukuk & Strateji Denetimi"]
 if is_admin:
+    tab_labels.append("📋 Denetim Geçmişi")
     tab_labels.append("⚙️ Yönetim Paneli")
 
 tabs = st.tabs(tab_labels)
@@ -275,6 +276,9 @@ with tabs[2]:
     render_hukuk(selected_model)
 
 if is_admin:
+    from ui.tab_gecmis import render as render_gecmis
     from ui.tab_yonetim_paneli import render as render_yonetim
     with tabs[3]:
+        render_gecmis()
+    with tabs[4]:
         render_yonetim()
