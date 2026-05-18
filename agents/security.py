@@ -11,7 +11,7 @@ _MAX_INPUT_LENGTH = 2000
 _INJECTION_PATTERNS = [
     r"ignore\s+(all\s+)?(previous|above|prior)\s+instructions?",
     r"forget\s+(all\s+)?(previous|above|prior)\s+instructions?",
-    r"önceki\s+talimatlar?\s*(ı|i)?\s*unut",
+    r"önceki\s+talimat(lar)?\s*(ı|i)?\s*unut",
     r"sistem\s+prompt",
     r"system\s+prompt",
     r"you\s+are\s+now",
