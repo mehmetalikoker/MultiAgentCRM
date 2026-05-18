@@ -11,10 +11,10 @@ def _supabase_config():
     try:
         import streamlit as st
         url = st.secrets.get("SUPABASE_URL") or os.getenv("SUPABASE_URL")
-        key = st.secrets.get("SUPABASE_SERVICE_KEY") or os.getenv("SUPABASE_SERVICE_KEY")
+        key = st.secrets.get("SUPABASE_KEY") or os.getenv("SUPABASE_KEY")
     except Exception:
         url = os.getenv("SUPABASE_URL")
-        key = os.getenv("SUPABASE_SERVICE_KEY")
+        key = os.getenv("SUPABASE_KEY")
     return url, key
 
 
