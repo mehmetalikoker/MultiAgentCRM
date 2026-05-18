@@ -147,11 +147,15 @@ _USERS_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "user", "
 
 
 def _load_users() -> dict:
-    if not os.path.exists(_USERS_FILE):
+    if os.path.exists(_USERS_FILE):
+        with open(_USERS_FILE, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        return {u["username"]: u for u in data.get("users", [])}
+    # Streamlit Cloud: secrets'tan oku
+    try:
+        return {u["username"]: dict(u) for u in st.secrets["users"]}
+    except Exception:
         return {}
-    with open(_USERS_FILE, "r", encoding="utf-8") as f:
-        data = json.load(f)
-    return {u["username"]: u for u in data.get("users", [])}
 
 
 def _check_credentials(username: str, password: str) -> bool:
