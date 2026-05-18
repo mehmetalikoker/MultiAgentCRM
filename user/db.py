@@ -53,7 +53,7 @@ def load_users() -> dict:
     url, key = _supabase_config()
     if url and key:
         resp = requests.get(
-            f"{url}/rest/v1/users",
+            f"{url}/rest/v1/crm_users",
             headers={**_headers(key), "Accept": "application/json"},
             params={"select": "username,password_hash,display_name"},
         )
@@ -66,7 +66,7 @@ def load_users_list() -> list:
     url, key = _supabase_config()
     if url and key:
         resp = requests.get(
-            f"{url}/rest/v1/users",
+            f"{url}/rest/v1/crm_users",
             headers={**_headers(key), "Accept": "application/json"},
             params={"select": "username,password_hash,display_name"},
         )
@@ -80,7 +80,7 @@ def add_user(username: str, password: str, display_name: str) -> None:
     url, key = _supabase_config()
     if url and key:
         resp = requests.post(
-            f"{url}/rest/v1/users",
+            f"{url}/rest/v1/crm_users",
             headers=_headers(key),
             json={"username": username, "password_hash": password_hash, "display_name": display_name or username},
         )
@@ -95,7 +95,7 @@ def delete_user(username: str) -> None:
     url, key = _supabase_config()
     if url and key:
         resp = requests.delete(
-            f"{url}/rest/v1/users",
+            f"{url}/rest/v1/crm_users",
             headers=_headers(key),
             params={"username": f"eq.{username}"},
         )
