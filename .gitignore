@@ -8,4 +8,3 @@ __pycache__/
 chroma_db/
 .streamlit/
 .claude/settings.local.json
-agents/prompts/
