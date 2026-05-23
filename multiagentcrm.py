@@ -249,12 +249,15 @@ is_admin = st.session_state.get("username") == "admin"
 
 if is_admin:
     from ui.tab_gecmis import render as render_gecmis
+    from ui.tab_istatistik import render as render_istatistik
     from ui.tab_yonetim_paneli import render as render_yonetim
 
-    tabs = st.tabs(["📋 Denetim Geçmişi", "⚙️ Yönetim Paneli"])
+    tabs = st.tabs(["📋 Denetim Geçmişi", "📊 Denetim İstatistikleri", "⚙️ Yönetim Paneli"])
     with tabs[0]:
         render_gecmis()
     with tabs[1]:
+        render_istatistik()
+    with tabs[2]:
         render_yonetim()
 else:
     from ui.tab_metin_denetimi import render as render_metin
