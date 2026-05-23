@@ -28,7 +28,7 @@ def render(selected_model: str, models: dict, non_vision_models: set):
     uploaded_file = st.file_uploader("Kampanya Görseli", type=["jpg", "jpeg", "png"])
 
     approved_text = st.text_area(
-        "Onaylanmış Kampanya Metni",
+        "Kampanya Metni (İsteğe Bağlı)",
         placeholder="Daha önce onaylanan kampanya metnini buraya girin...",
         height=120,
     )
@@ -36,8 +36,6 @@ def render(selected_model: str, models: dict, non_vision_models: set):
     if st.button("Görseli Denetle", type="primary"):
         if not uploaded_file:
             st.warning("Lütfen bir görsel yükleyin.")
-        elif not approved_text.strip():
-            st.warning("Lütfen onaylanmış kampanya metnini girin.")
         else:
             with st.spinner("Görsel denetleniyor..."):
                 try:
