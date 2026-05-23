@@ -10,6 +10,34 @@ _AGENT_LABELS = {
 }
 
 
+def get_agent_label(agent: str) -> str:
+    return _AGENT_LABELS.get(agent, agent)
+
+
+def compute_summary(logs: list) -> dict:
+    total     = len(logs)
+    safe      = sum(1 for e in logs if e.get("is_safe") is True)
+    unsafe    = sum(1 for e in logs if e.get("is_safe") is False)
+    safe_rate = round(safe / total * 100) if total else 0
+    return {"total": total, "safe": safe, "unsafe": unsafe, "safe_rate": safe_rate}
+
+
+def compute_agent_counts(logs: list) -> Counter:
+    return Counter(e.get("agent", "—") for e in logs)
+
+
+def compute_model_counts(logs: list) -> Counter:
+    return Counter(e.get("model", "—") for e in logs)
+
+
+def compute_user_stats(logs: list) -> dict:
+    return {
+        "total":  Counter(e.get("username") for e in logs),
+        "safe":   Counter(e.get("username") for e in logs if e.get("is_safe") is True),
+        "unsafe": Counter(e.get("username") for e in logs if e.get("is_safe") is False),
+    }
+
+
 def render():
     st.header("Denetim İstatistikleri")
 
@@ -19,16 +47,12 @@ def render():
         st.info("Henüz denetim kaydı yok.")
         return
 
-    total     = len(logs)
-    safe      = sum(1 for e in logs if e.get("is_safe") is True)
-    unsafe    = sum(1 for e in logs if e.get("is_safe") is False)
-    safe_rate = round(safe / total * 100) if total else 0
-
+    summary = compute_summary(logs)
     c1, c2, c3, c4 = st.columns(4)
-    c1.metric("Toplam Denetim", total)
-    c2.metric("Uygun", safe)
-    c3.metric("Uygunsuz", unsafe)
-    c4.metric("Uygunluk Oranı", f"%{safe_rate}")
+    c1.metric("Toplam Denetim", summary["total"])
+    c2.metric("Uygun",          summary["safe"])
+    c3.metric("Uygunsuz",       summary["unsafe"])
+    c4.metric("Uygunluk Oranı", f"%{summary['safe_rate']}")
 
     st.markdown("---")
 
@@ -36,23 +60,21 @@ def render():
 
     with col_agent:
         st.markdown("**Denetim Türü Dağılımı**")
-        agent_counts = Counter(e.get("agent", "—") for e in logs)
-        for agent, count in agent_counts.most_common():
-            label = _AGENT_LABELS.get(agent, agent)
-            st.markdown(f"- {label}: **{count}**")
+        for agent, count in compute_agent_counts(logs).most_common():
+            st.markdown(f"- {get_agent_label(agent)}: **{count}**")
 
     with col_model:
         st.markdown("**Model Kullanım Dağılımı**")
-        model_counts = Counter(e.get("model", "—") for e in logs)
-        for model, count in model_counts.most_common():
+        for model, count in compute_model_counts(logs).most_common():
             st.markdown(f"- {model}: **{count}**")
 
     st.markdown("---")
     st.markdown("**Kullanıcı Bazında Aktivite**")
 
-    user_total  = Counter(e.get("username") for e in logs)
-    user_safe   = Counter(e.get("username") for e in logs if e.get("is_safe") is True)
-    user_unsafe = Counter(e.get("username") for e in logs if e.get("is_safe") is False)
+    user_stats  = compute_user_stats(logs)
+    user_total  = user_stats["total"]
+    user_safe   = user_stats["safe"]
+    user_unsafe = user_stats["unsafe"]
 
     header_cols = st.columns([2, 2, 2, 2])
     header_cols[0].markdown("**Kullanıcı**")
