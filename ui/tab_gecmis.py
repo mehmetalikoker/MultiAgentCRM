@@ -96,11 +96,12 @@ def render():
     st.markdown("---")
     st.subheader("Kayıt Detayı")
     idx = st.selectbox(
-        "İncelenecek kayıt",
+        "Aşağıdan İncelenecek kaydı seçiniz",
         options=range(len(filtered)),
         format_func=lambda i: f"{filtered[i]['timestamp']}  |  {_AGENT_LABELS.get(filtered[i]['agent'], '')}  |  {filtered[i]['username']}",
     )
     entry = filtered[idx]
+    st.markdown("---")
     col_d1, col_d2 = st.columns(2)
     with col_d1:
         st.markdown(f"**Tarih:** {entry.get('timestamp')}")
