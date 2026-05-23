@@ -94,7 +94,7 @@ def render():
 
     # ── Detay görünümü ────────────────────────────────────────────────────────
     st.markdown("---")
-    st.subheader("Kayıt Detayı")
+    st.subheader("Arama Kaydı Seçimi")
     idx = st.selectbox(
         "Aşağıdan İncelenecek kaydı seçiniz",
         options=range(len(filtered)),
@@ -102,6 +102,7 @@ def render():
     )
     entry = filtered[idx]
     st.markdown("---")
+    st.subheader("Kayıt Detayı")
     col_d1, col_d2 = st.columns(2)
     with col_d1:
         st.markdown(f"**Tarih:** {entry.get('timestamp')}")
