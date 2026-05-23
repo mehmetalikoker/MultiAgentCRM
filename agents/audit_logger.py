@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Denetim geçmişi kayıt modülü.
+Arama geçmişi kayıt modülü.
 Her denetim sonucu state/audit_log.json dosyasına eklenir.
 """
 import json

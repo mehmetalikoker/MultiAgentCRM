@@ -245,32 +245,26 @@ st.markdown(
 )
 st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
 
-from ui.tab_metin_denetimi import render as render_metin
-from ui.tab_gorsel_denetim import render as render_gorsel
-from ui.tab_hukuk_strateji import render as render_hukuk
-
 is_admin = st.session_state.get("username") == "admin"
-
-tab_labels = ["📝 Metin Denetimi", "🖼️ Görsel Denetim", "⚖️ Hukuk & Strateji Denetimi"]
-if is_admin:
-    tab_labels.append("📋 Denetim Geçmişi")
-    tab_labels.append("⚙️ Yönetim Paneli")
-
-tabs = st.tabs(tab_labels)
-
-with tabs[0]:
-    render_metin(selected_model, MODELS)
-
-with tabs[1]:
-    render_gorsel(selected_model, MODELS, _NON_VISION_MODELS)
-
-with tabs[2]:
-    render_hukuk(selected_model)
 
 if is_admin:
     from ui.tab_gecmis import render as render_gecmis
     from ui.tab_yonetim_paneli import render as render_yonetim
-    with tabs[3]:
+
+    tabs = st.tabs(["📋 Denetim Geçmişi", "⚙️ Yönetim Paneli"])
+    with tabs[0]:
         render_gecmis()
-    with tabs[4]:
+    with tabs[1]:
         render_yonetim()
+else:
+    from ui.tab_metin_denetimi import render as render_metin
+    from ui.tab_gorsel_denetim import render as render_gorsel
+    from ui.tab_hukuk_strateji import render as render_hukuk
+
+    tabs = st.tabs(["📝 Metin Denetimi", "🖼️ Görsel Denetim", "⚖️ Hukuk & Strateji Denetimi"])
+    with tabs[0]:
+        render_metin(selected_model, MODELS)
+    with tabs[1]:
+        render_gorsel(selected_model, MODELS, _NON_VISION_MODELS)
+    with tabs[2]:
+        render_hukuk(selected_model)

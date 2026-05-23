@@ -17,7 +17,7 @@ _RESULT_ICONS = {
 
 
 def render():
-    st.header("Denetim Geçmişi")
+    st.header("Arama Geçmişi")
 
     entries = load_audit_log()
 
