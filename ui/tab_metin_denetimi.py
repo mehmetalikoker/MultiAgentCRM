@@ -92,7 +92,7 @@ def render(selected_model: str, models: dict):
                         campaign_text=campaign_text,
                         channel=channel,
                         is_safe=is_safe,
-                        result_summary=parsed_report.get("report", "") if parsed_report else report[:500],
+                        result_summary=parsed_report.get("report", "") if parsed_report else report,
                     )
 
                 except Exception as e:

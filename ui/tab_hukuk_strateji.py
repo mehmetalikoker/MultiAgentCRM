@@ -86,7 +86,7 @@ def render(selected_model: str):
                         model=selected_model,
                         campaign_text=legal_campaign_text,
                         score=score,
-                        result_summary=report[:500],
+                        result_summary=report,
                     )
 
                 except Exception as e:

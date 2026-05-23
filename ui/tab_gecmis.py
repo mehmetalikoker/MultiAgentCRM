@@ -129,4 +129,10 @@ def render():
 
     if entry.get("result_summary"):
         st.markdown("**Özet:**")
-        st.markdown(entry["result_summary"])
+        st.text_area(
+            label="özet_alani",
+            value=entry["result_summary"],
+            height=300,
+            disabled=True,
+            label_visibility="collapsed",
+        )

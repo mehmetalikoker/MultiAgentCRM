@@ -76,7 +76,7 @@ def render(selected_model: str, models: dict, non_vision_models: set):
                         model=selected_model,
                         campaign_text=approved_text,
                         is_safe=is_visual_safe,
-                        result_summary=report[:500],
+                        result_summary=report,
                     )
 
                 except Exception as e:
