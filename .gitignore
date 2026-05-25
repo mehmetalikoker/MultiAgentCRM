@@ -8,3 +8,4 @@ __pycache__/
 chroma_db/
 .streamlit/
 .claude/settings.local.json
+user/login_attempts.json
