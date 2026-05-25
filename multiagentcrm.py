@@ -23,6 +23,7 @@ _load_css("css/main.css")
 # ─── KİMLİK DOĞRULAMA ─────────────────────────────────────────────────────────
 
 from user.db import load_users
+from user.rate_limiter import is_locked, record_failure, record_success, attempts_remaining
 
 
 def _check_credentials(username: str, password: str) -> bool:
@@ -58,14 +59,36 @@ def _show_login():
         st.markdown("</div>", unsafe_allow_html=True)
 
         if submitted:
-            if _check_credentials(username, password):
+            locked, wait_secs = is_locked(username)
+            if locked:
+                mins, secs = divmod(wait_secs, 60)
+                st.error(
+                    f"Hesap geçici olarak kilitlendi. "
+                    f"Lütfen {mins} dakika {secs} saniye sonra tekrar deneyin."
+                )
+            elif _check_credentials(username, password):
+                record_success(username)
                 users = load_users()
                 st.session_state["authenticated"] = True
                 st.session_state["username"] = username
                 st.session_state["display_name"] = users[username].get("display_name", username)
                 st.rerun()
             else:
-                st.error("Kullanıcı adı veya şifre hatalı.")
+                newly_locked, wait_secs = record_failure(username)
+                if newly_locked:
+                    st.error(
+                        "Çok fazla başarısız giriş denemesi. "
+                        "Hesabınız 5 dakika süreyle kilitlendi."
+                    )
+                else:
+                    remaining = attempts_remaining(username)
+                    if remaining <= 2:
+                        st.warning(
+                            f"Kullanıcı adı veya şifre hatalı. "
+                            f"{remaining} deneme hakkınız kaldı."
+                        )
+                    else:
+                        st.error("Kullanıcı adı veya şifre hatalı.")
 
 
 if not st.session_state.get("authenticated"):
