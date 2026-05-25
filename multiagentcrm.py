@@ -149,12 +149,6 @@ def _show_login():
                 password = st.text_input("Şifre", type="password", placeholder="••••••••")
                 st.markdown("<div style='height:4px'></div>", unsafe_allow_html=True)
                 submitted = st.form_submit_button("Giriş Yap", use_container_width=True, type="primary")
-            st.markdown(
-                "<div style='text-align:right; margin-top:8px;'>"
-                "<a href='#' onclick='void(0)' style='color:#FF6200; font-size:0.85rem; "
-                "text-decoration:none;' id='forgot_link'>Şifremi Unuttum</a></div>",
-                unsafe_allow_html=True,
-            )
             forgot = st.button("Şifremi Unuttum →", use_container_width=False, type="secondary")
             st.markdown("</div>", unsafe_allow_html=True)
 
