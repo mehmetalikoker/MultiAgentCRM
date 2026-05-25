@@ -22,8 +22,10 @@ _load_css("css/main.css")
 
 # ─── KİMLİK DOĞRULAMA ─────────────────────────────────────────────────────────
 
-from user.db import load_users
+from user.db import load_users, update_password, get_user_by_email
 from user.rate_limiter import record_failure, record_success, attempts_remaining
+from user.reset_tokens import create_token, verify_token, consume_token
+from user.mailer import send_reset_email
 
 
 def _check_credentials(username: str, password: str) -> bool:
@@ -38,53 +40,155 @@ def _check_credentials(username: str, password: str) -> bool:
 def _show_login():
     col_left, col_center, col_right = st.columns([1, 1.1, 1])
     with col_center:
-        st.markdown("""
-        <div class="ing-login-card">
-            <div class="ing-login-title"><span style="color:#FF6200;">Agentic CRM</span></div>
-            <div class="ing-login-sub">Devam etmek için kurumsal hesabınızla giriş yapın</div>
-        </div>
-        """, unsafe_allow_html=True)
+        step = st.session_state.get("reset_step", "login")
 
-        st.markdown("<div style='background:#fff; border-radius:0 0 12px 12px; padding:0 36px 32px; "
-                    "box-shadow:0 4px 24px rgba(0,0,0,0.10); margin-top:-8px;'>",
-                    unsafe_allow_html=True)
+        # ── Adım 1: E-posta ile kod iste ─────────────────────────────────────
+        if step == "request":
+            st.markdown("""
+            <div class="ing-login-card">
+                <div class="ing-login-title"><span style="color:#FF6200;">Şifre Sıfırlama</span></div>
+                <div class="ing-login-sub">Kayıtlı e-posta adresinize sıfırlama kodu gönderilecek</div>
+            </div>
+            """, unsafe_allow_html=True)
+            st.markdown("<div style='background:#fff; border-radius:0 0 12px 12px; padding:0 36px 32px; "
+                        "box-shadow:0 4px 24px rgba(0,0,0,0.10); margin-top:-8px;'>",
+                        unsafe_allow_html=True)
+            with st.form("reset_request_form"):
+                st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
+                email_input = st.text_input("E-posta Adresi", placeholder="ornek@sirket.com")
+                st.markdown("<div style='height:4px'></div>", unsafe_allow_html=True)
+                col_send, col_back = st.columns(2)
+                with col_send:
+                    send_btn = st.form_submit_button("Kod Gönder", use_container_width=True, type="primary")
+                with col_back:
+                    back_btn = st.form_submit_button("Geri Dön", use_container_width=True)
+            st.markdown("</div>", unsafe_allow_html=True)
 
-        with st.form("login_form"):
-            st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
-            username = st.text_input("Kullanıcı Adı", placeholder="kullanıcı adı")
-            password = st.text_input("Şifre", type="password", placeholder="••••••••")
-            st.markdown("<div style='height:4px'></div>", unsafe_allow_html=True)
-            submitted = st.form_submit_button("Giriş Yap", use_container_width=True, type="primary")
-
-        st.markdown("</div>", unsafe_allow_html=True)
-
-        if submitted:
-            users = load_users()
-            user_record = users.get(username)
-            if user_record and user_record.get("locked"):
-                st.error("Hesabınız kilitlenmiştir. Lütfen yönetici ile iletişime geçin.")
-            elif _check_credentials(username, password):
-                record_success(username)
-                st.session_state["authenticated"] = True
-                st.session_state["username"] = username
-                st.session_state["display_name"] = user_record.get("display_name", username)
+            if back_btn:
+                st.session_state.pop("reset_step", None)
                 st.rerun()
-            else:
-                locked_now = record_failure(username)
-                if locked_now:
-                    st.error(
-                        "Çok fazla başarısız giriş denemesi. "
-                        "Hesabınız kilitlendi. Lütfen yönetici ile iletişime geçin."
-                    )
+            if send_btn:
+                user_record = get_user_by_email(email_input)
+                if user_record:
+                    try:
+                        code = create_token(user_record["username"])
+                        send_reset_email(
+                            user_record["email"],
+                            user_record.get("display_name", user_record["username"]),
+                            code,
+                        )
+                        st.session_state["reset_username"] = user_record["username"]
+                        st.session_state["reset_step"] = "verify"
+                        st.rerun()
+                    except Exception as e:
+                        st.error(f"E-posta gönderilemedi: {e}")
                 else:
-                    remaining = attempts_remaining(username)
-                    if remaining <= 2:
-                        st.warning(
-                            f"Kullanıcı adı veya şifre hatalı. "
-                            f"{remaining} deneme hakkınız kaldı."
+                    # Kullanıcı bulunamasa da aynı mesajı göster (enumeration önlemi)
+                    st.session_state["reset_step"] = "verify"
+                    st.session_state["reset_username"] = ""
+                    st.rerun()
+
+        # ── Adım 2: Kodu doğrula ve yeni şifre belirle ───────────────────────
+        elif step == "verify":
+            st.markdown("""
+            <div class="ing-login-card">
+                <div class="ing-login-title"><span style="color:#FF6200;">Kod Doğrulama</span></div>
+                <div class="ing-login-sub">E-postanıza gelen 6 haneli kodu girin</div>
+            </div>
+            """, unsafe_allow_html=True)
+            st.markdown("<div style='background:#fff; border-radius:0 0 12px 12px; padding:0 36px 32px; "
+                        "box-shadow:0 4px 24px rgba(0,0,0,0.10); margin-top:-8px;'>",
+                        unsafe_allow_html=True)
+            with st.form("reset_verify_form"):
+                st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
+                code_input = st.text_input("Doğrulama Kodu", placeholder="123456", max_chars=6)
+                new_pass = st.text_input("Yeni Şifre", type="password", placeholder="••••••••")
+                new_pass2 = st.text_input("Yeni Şifre (Tekrar)", type="password", placeholder="••••••••")
+                st.markdown("<div style='height:4px'></div>", unsafe_allow_html=True)
+                col_confirm, col_back = st.columns(2)
+                with col_confirm:
+                    confirm_btn = st.form_submit_button("Şifreyi Güncelle", use_container_width=True, type="primary")
+                with col_back:
+                    back_btn = st.form_submit_button("Geri Dön", use_container_width=True)
+            st.markdown("</div>", unsafe_allow_html=True)
+
+            if back_btn:
+                st.session_state.pop("reset_step", None)
+                st.session_state.pop("reset_username", None)
+                st.rerun()
+            if confirm_btn:
+                reset_user = st.session_state.get("reset_username", "")
+                if not reset_user or not verify_token(reset_user, code_input):
+                    st.error("Kod hatalı veya süresi dolmuş.")
+                elif new_pass != new_pass2:
+                    st.error("Şifreler eşleşmiyor.")
+                elif len(new_pass) < 6:
+                    st.warning("Şifre en az 6 karakter olmalıdır.")
+                else:
+                    consume_token(reset_user)
+                    update_password(reset_user, new_pass)
+                    st.session_state.pop("reset_step", None)
+                    st.session_state.pop("reset_username", None)
+                    st.success("Şifreniz güncellendi. Giriş yapabilirsiniz.")
+                    st.rerun()
+
+        # ── Adım 0: Normal giriş formu ────────────────────────────────────────
+        else:
+            st.markdown("""
+            <div class="ing-login-card">
+                <div class="ing-login-title"><span style="color:#FF6200;">Agentic CRM</span></div>
+                <div class="ing-login-sub">Devam etmek için kurumsal hesabınızla giriş yapın</div>
+            </div>
+            """, unsafe_allow_html=True)
+            st.markdown("<div style='background:#fff; border-radius:0 0 12px 12px; padding:0 36px 32px; "
+                        "box-shadow:0 4px 24px rgba(0,0,0,0.10); margin-top:-8px;'>",
+                        unsafe_allow_html=True)
+            with st.form("login_form"):
+                st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
+                username = st.text_input("Kullanıcı Adı", placeholder="kullanıcı adı")
+                password = st.text_input("Şifre", type="password", placeholder="••••••••")
+                st.markdown("<div style='height:4px'></div>", unsafe_allow_html=True)
+                submitted = st.form_submit_button("Giriş Yap", use_container_width=True, type="primary")
+            st.markdown(
+                "<div style='text-align:right; margin-top:8px;'>"
+                "<a href='#' onclick='void(0)' style='color:#FF6200; font-size:0.85rem; "
+                "text-decoration:none;' id='forgot_link'>Şifremi Unuttum</a></div>",
+                unsafe_allow_html=True,
+            )
+            forgot = st.button("Şifremi Unuttum →", use_container_width=False, type="secondary")
+            st.markdown("</div>", unsafe_allow_html=True)
+
+            if forgot:
+                st.session_state["reset_step"] = "request"
+                st.rerun()
+
+            if submitted:
+                users = load_users()
+                user_record = users.get(username)
+                if user_record and user_record.get("locked"):
+                    st.error("Hesabınız kilitlenmiştir. Lütfen yönetici ile iletişime geçin.")
+                elif _check_credentials(username, password):
+                    record_success(username)
+                    st.session_state["authenticated"] = True
+                    st.session_state["username"] = username
+                    st.session_state["display_name"] = user_record.get("display_name", username)
+                    st.rerun()
+                else:
+                    locked_now = record_failure(username)
+                    if locked_now:
+                        st.error(
+                            "Çok fazla başarısız giriş denemesi. "
+                            "Hesabınız kilitlendi. Lütfen yönetici ile iletişime geçin."
                         )
                     else:
-                        st.error("Kullanıcı adı veya şifre hatalı.")
+                        remaining = attempts_remaining(username)
+                        if remaining <= 2:
+                            st.warning(
+                                f"Kullanıcı adı veya şifre hatalı. "
+                                f"{remaining} deneme hakkınız kaldı."
+                            )
+                        else:
+                            st.error("Kullanıcı adı veya şifre hatalı.")
 
 
 if not st.session_state.get("authenticated"):

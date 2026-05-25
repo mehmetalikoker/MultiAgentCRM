@@ -25,13 +25,41 @@ def _save(users: list):
         json.dump({"users": users}, f, ensure_ascii=False, indent=2)
 
 
-def add_user(username: str, password: str, display_name: str) -> None:
+def add_user(username: str, password: str, display_name: str, email: str = "") -> None:
     users = load_users_list()
-    users.append({
+    entry = {
         "username": username,
         "password_hash": hashlib.sha256(password.encode()).hexdigest(),
         "display_name": display_name or username,
-    })
+    }
+    if email:
+        entry["email"] = email.strip().lower()
+    users.append(entry)
+    _save(users)
+
+
+def update_password(username: str, new_password: str) -> None:
+    users = load_users_list()
+    for u in users:
+        if u["username"] == username:
+            u["password_hash"] = hashlib.sha256(new_password.encode()).hexdigest()
+            break
+    _save(users)
+
+
+def get_user_by_email(email: str) -> dict | None:
+    for u in load_users_list():
+        if u.get("email", "").lower() == email.strip().lower():
+            return u
+    return None
+
+
+def set_user_email(username: str, email: str) -> None:
+    users = load_users_list()
+    for u in users:
+        if u["username"] == username:
+            u["email"] = email.strip().lower()
+            break
     _save(users)
 
 

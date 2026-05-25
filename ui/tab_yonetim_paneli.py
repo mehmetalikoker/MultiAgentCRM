@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import streamlit as st
-from user.db import load_users_list, add_user, delete_user, unlock_user
+from user.db import load_users_list, add_user, delete_user, unlock_user, set_user_email
 
 
 def render():
@@ -15,9 +15,16 @@ def render():
     if not users:
         st.info("Henüz kullanıcı yok.")
     else:
+        header_cols = st.columns([2, 2.5, 2.5, 1, 1])
+        for col, label in zip(header_cols, ["Kullanıcı Adı", "Görünen Ad", "E-posta", "", ""]):
+            col.markdown(f"<span style='color:#888;font-size:0.8rem;'>{label}</span>",
+                         unsafe_allow_html=True)
+        st.markdown("<hr style='margin:4px 0 8px;border-color:#eee;'>", unsafe_allow_html=True)
+
         for i, u in enumerate(users):
             is_locked = u.get("locked", False)
-            col_name, col_display, col_unlock, col_delete = st.columns([2, 3, 1, 1])
+            col_name, col_display, col_email, col_unlock, col_delete = st.columns([2, 2.5, 2.5, 1, 1])
+
             with col_name:
                 if is_locked:
                     st.markdown(
@@ -28,14 +35,32 @@ def render():
                     )
                 else:
                     st.markdown(f"**{u['username']}**")
+
             with col_display:
                 st.markdown(u.get("display_name", "—"))
+
+            with col_email:
+                current_email = u.get("email", "")
+                new_email = st.text_input(
+                    "email",
+                    value=current_email,
+                    placeholder="eposta@sirket.com",
+                    key=f"email_{i}",
+                    label_visibility="collapsed",
+                )
+                if new_email.strip() != current_email:
+                    if st.button("Kaydet", key=f"save_email_{i}", type="secondary"):
+                        set_user_email(u["username"], new_email.strip())
+                        st.success("E-posta güncellendi.")
+                        st.rerun()
+
             with col_unlock:
                 if is_locked:
                     if st.button("Aktif Et", key=f"unlock_{i}", type="primary"):
                         unlock_user(u["username"])
                         st.success(f"'{u['username']}' hesabı aktif edildi.")
                         st.rerun()
+
             with col_delete:
                 if u["username"] == "admin":
                     st.markdown("<span style='color:#aaa; font-size:0.8rem;'>silinemez</span>",
@@ -58,7 +83,7 @@ def render():
             new_password = st.text_input("Şifre", type="password")
         with col2:
             new_display = st.text_input("Görünen Ad")
-            st.markdown("<br>", unsafe_allow_html=True)
+            new_email = st.text_input("E-posta Adresi", placeholder="eposta@sirket.com")
 
         submitted = st.form_submit_button("Kullanıcı Ekle", type="primary", use_container_width=True)
 
@@ -68,6 +93,6 @@ def render():
         elif any(u["username"] == new_username.strip() for u in users):
             st.error(f"'{new_username}' kullanıcı adı zaten mevcut.")
         else:
-            add_user(new_username.strip(), new_password, new_display.strip())
+            add_user(new_username.strip(), new_password, new_display.strip(), new_email.strip())
             st.success(f"'{new_username}' başarıyla eklendi.")
             st.rerun()
