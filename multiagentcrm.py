@@ -23,7 +23,7 @@ _load_css("css/main.css")
 # ─── KİMLİK DOĞRULAMA ─────────────────────────────────────────────────────────
 
 from user.db import load_users
-from user.rate_limiter import is_locked, record_failure, record_success, attempts_remaining
+from user.rate_limiter import record_failure, record_success, attempts_remaining
 
 
 def _check_credentials(username: str, password: str) -> bool:
@@ -59,26 +59,22 @@ def _show_login():
         st.markdown("</div>", unsafe_allow_html=True)
 
         if submitted:
-            locked, wait_secs = is_locked(username)
-            if locked:
-                mins, secs = divmod(wait_secs, 60)
-                st.error(
-                    f"Hesap geçici olarak kilitlendi. "
-                    f"Lütfen {mins} dakika {secs} saniye sonra tekrar deneyin."
-                )
+            users = load_users()
+            user_record = users.get(username)
+            if user_record and user_record.get("locked"):
+                st.error("Hesabınız kilitlenmiştir. Lütfen yönetici ile iletişime geçin.")
             elif _check_credentials(username, password):
                 record_success(username)
-                users = load_users()
                 st.session_state["authenticated"] = True
                 st.session_state["username"] = username
-                st.session_state["display_name"] = users[username].get("display_name", username)
+                st.session_state["display_name"] = user_record.get("display_name", username)
                 st.rerun()
             else:
-                newly_locked, wait_secs = record_failure(username)
-                if newly_locked:
+                locked_now = record_failure(username)
+                if locked_now:
                     st.error(
                         "Çok fazla başarısız giriş denemesi. "
-                        "Hesabınız 5 dakika süreyle kilitlendi."
+                        "Hesabınız kilitlendi. Lütfen yönetici ile iletişime geçin."
                     )
                 else:
                     remaining = attempts_remaining(username)

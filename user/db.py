@@ -37,3 +37,21 @@ def add_user(username: str, password: str, display_name: str) -> None:
 
 def delete_user(username: str) -> None:
     _save([u for u in load_users_list() if u["username"] != username])
+
+
+def lock_user(username: str) -> None:
+    users = load_users_list()
+    for u in users:
+        if u["username"] == username:
+            u["locked"] = True
+            break
+    _save(users)
+
+
+def unlock_user(username: str) -> None:
+    users = load_users_list()
+    for u in users:
+        if u["username"] == username:
+            u.pop("locked", None)
+            break
+    _save(users)
