@@ -37,7 +37,71 @@ def _check_credentials(username: str, password: str) -> bool:
     return hashed == user["password_hash"]
 
 
+_BANK_SVG = """
+<div style="text-align:center; margin-bottom:-4px; padding-top:28px;">
+<svg width="340" height="112" viewBox="0 0 340 112" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="25"  cy="12" r="1.2" fill="rgba(255,255,255,0.55)"/>
+  <circle cx="65"  cy="6"  r="0.8" fill="rgba(255,255,255,0.40)"/>
+  <circle cx="110" cy="19" r="1.0" fill="rgba(255,255,255,0.45)"/>
+  <circle cx="230" cy="9"  r="1.2" fill="rgba(255,255,255,0.55)"/>
+  <circle cx="280" cy="14" r="0.8" fill="rgba(255,255,255,0.40)"/>
+  <circle cx="316" cy="5"  r="1.0" fill="rgba(255,255,255,0.45)"/>
+  <rect x="0"  y="74" width="28" height="38" rx="1" fill="rgba(255,255,255,0.06)"/>
+  <rect x="4"  y="80" width="4" height="5" fill="rgba(255,255,255,0.10)"/>
+  <rect x="12" y="80" width="4" height="5" fill="rgba(255,255,255,0.10)"/>
+  <rect x="20" y="80" width="4" height="5" fill="rgba(255,255,255,0.10)"/>
+  <rect x="35" y="58" width="35" height="54" rx="1" fill="rgba(255,255,255,0.08)"/>
+  <rect x="39" y="64" width="5" height="7" fill="rgba(255,255,255,0.12)"/>
+  <rect x="49" y="64" width="5" height="7" fill="rgba(255,255,255,0.12)"/>
+  <rect x="59" y="64" width="5" height="7" fill="rgba(255,255,255,0.12)"/>
+  <rect x="39" y="76" width="5" height="7" fill="rgba(255,255,255,0.08)"/>
+  <rect x="49" y="76" width="5" height="7" fill="rgba(255,255,255,0.08)"/>
+  <rect x="59" y="76" width="5" height="7" fill="rgba(255,255,255,0.08)"/>
+  <rect x="78" y="68" width="22" height="44" rx="1" fill="rgba(255,255,255,0.06)"/>
+  <line x1="170" y1="5"  x2="170" y2="28" stroke="rgba(255,255,255,0.35)" stroke-width="1.5"/>
+  <polygon points="170,5 178,12 170,15 162,12" fill="#FF6200" opacity="0.80"/>
+  <polygon points="170,28 216,50 124,50" fill="rgba(255,98,0,0.18)"/>
+  <line x1="124" y1="50" x2="216" y2="50" stroke="rgba(255,98,0,0.40)" stroke-width="1.5"/>
+  <rect x="122" y="50" width="96" height="8" fill="rgba(255,255,255,0.07)"/>
+  <rect x="128" y="58" width="7" height="54" rx="1" fill="rgba(255,255,255,0.12)"/>
+  <rect x="142" y="58" width="7" height="54" rx="1" fill="rgba(255,255,255,0.12)"/>
+  <rect x="156" y="58" width="7" height="54" rx="1" fill="rgba(255,255,255,0.15)"/>
+  <rect x="170" y="58" width="7" height="54" rx="1" fill="rgba(255,255,255,0.15)"/>
+  <rect x="184" y="58" width="7" height="54" rx="1" fill="rgba(255,255,255,0.12)"/>
+  <rect x="198" y="58" width="7" height="54" rx="1" fill="rgba(255,255,255,0.12)"/>
+  <rect x="118" y="110" width="104" height="3" fill="rgba(255,98,0,0.30)"/>
+  <rect x="115" y="113" width="110" height="2" fill="rgba(255,98,0,0.15)"/>
+  <rect x="240" y="66" width="22" height="46" rx="1" fill="rgba(255,255,255,0.06)"/>
+  <rect x="270" y="52" width="35" height="60" rx="1" fill="rgba(255,255,255,0.08)"/>
+  <rect x="274" y="58" width="5" height="7" fill="rgba(255,255,255,0.12)"/>
+  <rect x="284" y="58" width="5" height="7" fill="rgba(255,255,255,0.12)"/>
+  <rect x="294" y="58" width="5" height="7" fill="rgba(255,255,255,0.12)"/>
+  <rect x="274" y="70" width="5" height="7" fill="rgba(255,255,255,0.08)"/>
+  <rect x="284" y="70" width="5" height="7" fill="rgba(255,255,255,0.08)"/>
+  <rect x="294" y="70" width="5" height="7" fill="rgba(255,255,255,0.08)"/>
+  <rect x="312" y="76" width="28" height="36" rx="1" fill="rgba(255,255,255,0.06)"/>
+  <line x1="0"   y1="40" x2="108" y2="40" stroke="rgba(255,255,255,0.04)" stroke-width="0.5"/>
+  <line x1="232" y1="40" x2="340" y2="40" stroke="rgba(255,255,255,0.04)" stroke-width="0.5"/>
+  <line x1="0" y1="112" x2="340" y2="112" stroke="rgba(255,98,0,0.30)" stroke-width="1"/>
+</svg>
+</div>
+"""
+
+
 def _show_login():
+    st.markdown("""<style>
+html, body, [data-testid="stAppViewContainer"] {
+    background-color: #0a1628 !important;
+    background-image:
+        radial-gradient(ellipse at 25%% 80%%, rgba(255,98,0,0.07) 0%%, transparent 50%%),
+        radial-gradient(ellipse at 75%% 20%%, rgba(0,90,180,0.10) 0%%, transparent 50%%),
+        linear-gradient(160deg, #0a1628 0%%, #162840 55%%, #0a1628 100%%) !important;
+    background-attachment: fixed !important;
+}
+[data-testid="stSidebar"] { display: none !important; }
+.ing-login-card { margin-top: 0 !important; }
+</style>""", unsafe_allow_html=True)
+
     col_left, col_center, col_right = st.columns([1, 1.1, 1])
     with col_center:
         step = st.session_state.get("reset_step", "login")
@@ -134,6 +198,7 @@ def _show_login():
 
         # ── Adım 0: Normal giriş formu ────────────────────────────────────────
         else:
+            st.markdown(_BANK_SVG, unsafe_allow_html=True)
             st.markdown("""
             <div class="ing-login-card">
                 <div class="ing-login-title"><span style="color:#FF6200;">Agentic CRM</span></div>
