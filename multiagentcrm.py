@@ -52,6 +52,9 @@ def _bank_hero() -> str:
 
 
 def _show_login():
+    if st.session_state.pop("kicked_out", False):
+        st.warning("Hesabınıza başka bir cihazdan giriş yapıldığı için oturumunuz sonlandırıldı.")
+
     st.markdown("""<style>
 html, body, [data-testid="stAppViewContainer"] {
     background-color: #eef2f7 !important;
@@ -198,6 +201,7 @@ html, body, [data-testid="stAppViewContainer"] {
                     st.session_state["authenticated"] = True
                     st.session_state["username"] = username
                     st.session_state["display_name"] = display
+                    st.session_state["token_id"] = token_id
                     st.rerun()
                 else:
                     locked_now = record_failure(username)
@@ -230,6 +234,7 @@ if not st.session_state.get("authenticated"):
             st.session_state["authenticated"] = True
             st.session_state["username"] = _payload["sub"]
             st.session_state["display_name"] = _payload["display_name"]
+            st.session_state["token_id"] = _payload["tid"]
             st.rerun()
         else:
             _cookie.remove("crm_auth")  # süresi dolmuş / başka cihazdan login edilmiş
@@ -237,6 +242,14 @@ if not st.session_state.get("authenticated"):
 if not st.session_state.get("authenticated"):
     _show_login()
     st.stop()
+
+# ─── AKTİF OTURUM KONTROLÜ (her render'da) ───────────────────────────────────
+_stored_tid = get_active_token(st.session_state.get("username", ""))
+if _stored_tid != st.session_state.get("token_id"):
+    _cookie.remove("crm_auth")
+    st.session_state.clear()
+    st.session_state["kicked_out"] = True
+    st.rerun()
 
 MODELS = {
     # Anthropic
