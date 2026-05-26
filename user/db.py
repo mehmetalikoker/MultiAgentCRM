@@ -83,3 +83,25 @@ def unlock_user(username: str) -> None:
             u.pop("locked", None)
             break
     _save(users)
+
+
+def set_active_token(username: str, token_id: str) -> None:
+    users = load_users_list()
+    for u in users:
+        if u["username"] == username:
+            u["active_token_id"] = token_id
+            break
+    _save(users)
+
+
+def get_active_token(username: str) -> str | None:
+    return load_users().get(username, {}).get("active_token_id")
+
+
+def clear_active_token(username: str) -> None:
+    users = load_users_list()
+    for u in users:
+        if u["username"] == username:
+            u.pop("active_token_id", None)
+            break
+    _save(users)

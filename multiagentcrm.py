@@ -23,7 +23,7 @@ _load_css("css/main.css")
 # ─── KİMLİK DOĞRULAMA ─────────────────────────────────────────────────────────
 
 from streamlit_cookies_controller import CookieController
-from user.db import load_users, update_password, get_user_by_email
+from user.db import load_users, update_password, get_user_by_email, set_active_token, get_active_token, clear_active_token
 from user.jwt_auth import create_jwt, verify_jwt
 from user.rate_limiter import record_failure, record_success, attempts_remaining
 from user.reset_tokens import create_token, verify_token, consume_token
@@ -233,7 +233,9 @@ html, body, [data-testid="stAppViewContainer"] {
                 elif _check_credentials(username, password):
                     record_success(username)
                     display = user_record.get("display_name", username)
-                    _cookie.set("crm_auth", create_jwt(username, display), max_age=8 * 3600)
+                    jwt_token, token_id = create_jwt(username, display)
+                    set_active_token(username, token_id)
+                    _cookie.set("crm_auth", jwt_token, max_age=8 * 3600)
                     st.session_state["authenticated"] = True
                     st.session_state["username"] = username
                     st.session_state["display_name"] = display
@@ -261,13 +263,17 @@ if not st.session_state.get("authenticated"):
     _jwt_token = _cookie.get("crm_auth")
     if _jwt_token:
         _payload = verify_jwt(_jwt_token)
-        if _payload:
+        _valid = (
+            _payload is not None
+            and get_active_token(_payload["sub"]) == _payload.get("tid")
+        )
+        if _valid:
             st.session_state["authenticated"] = True
             st.session_state["username"] = _payload["sub"]
             st.session_state["display_name"] = _payload["display_name"]
             st.rerun()
         else:
-            _cookie.remove("crm_auth")  # süresi dolmuş / geçersiz
+            _cookie.remove("crm_auth")  # süresi dolmuş / başka cihazdan login edilmiş
 
 if not st.session_state.get("authenticated"):
     _show_login()
@@ -304,6 +310,7 @@ with st.sidebar:
                 unsafe_allow_html=True)
     st.markdown("<div style='height:6px'></div>", unsafe_allow_html=True)
     if st.button("Çıkış Yap", use_container_width=True, type="secondary"):
+        clear_active_token(st.session_state.get("username", ""))
         _cookie.remove("crm_auth")
         st.session_state.clear()
         st.rerun()
