@@ -3,7 +3,6 @@ import sys
 sys.stdout.reconfigure(encoding='utf-8')
 
 import base64
-import os
 from pathlib import Path
 from typing import TypedDict, List
 from dotenv import load_dotenv
@@ -22,7 +21,8 @@ def _load_prompt(name: str) -> str:
 
 class AgentState(TypedDict):
     campaign_text: str
-    image_path: str
+    image_bytes: bytes
+    image_mime: str
     selected_model: str
     compliance_report: str
     visual_report: str
@@ -33,18 +33,14 @@ class AgentState(TypedDict):
 workflow = StateGraph(AgentState)
 
 # --- 1. GÖRSEL İŞLEME YARDIMCISI ---
-def encode_image(image_path: str):
-    ext = os.path.splitext(image_path)[1].lower()
-    mime_map = {".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".png": "image/png", ".gif": "image/gif", ".webp": "image/webp"}
-    mime_type = mime_map.get(ext, "image/jpeg")
-    with open(image_path, "rb") as f:
-        data = base64.b64encode(f.read()).decode("utf-8")
-    return data, mime_type
+def encode_image(image_bytes: bytes) -> str:
+    return base64.b64encode(image_bytes).decode("utf-8")
 
 # --- 2. VISUAL AUDITOR AGENT LOGIC ---
 def visual_auditor(state: AgentState):
     llm = get_llm(state.get("selected_model", "gpt-4o"))
-    base64_image, mime_type = encode_image(state["image_path"])
+    base64_image = encode_image(state["image_bytes"])
+    mime_type = state["image_mime"]
 
     safe_text = sanitize_input(state["campaign_text"])
     wrapped_text = wrap_user_content(safe_text)

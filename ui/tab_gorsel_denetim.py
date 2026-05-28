@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import os
-import tempfile
 import streamlit as st
 from agents.audit_logger import log_audit
 
@@ -39,20 +38,18 @@ def render(selected_model: str, models: dict, non_vision_models: set):
         else:
             with st.spinner("Görsel denetleniyor..."):
                 try:
-                    with tempfile.NamedTemporaryFile(
-                        delete=False, suffix=os.path.splitext(uploaded_file.name)[1]
-                    ) as tmp:
-                        tmp.write(uploaded_file.read())
-                        tmp_path = tmp.name
+                    ext = os.path.splitext(uploaded_file.name)[1].lower()
+                    mime_map = {".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".png": "image/png", ".gif": "image/gif", ".webp": "image/webp"}
+                    mime_type = mime_map.get(ext, "image/jpeg")
 
                     from agents.visualcontrolagent import app as visual_app
 
                     result = visual_app.invoke({
                         "campaign_text": approved_text,
-                        "image_path": tmp_path,
+                        "image_bytes": uploaded_file.read(),
+                        "image_mime": mime_type,
                         "selected_model": selected_model,
                     })
-                    os.unlink(tmp_path)
 
                     is_visual_safe = result.get("is_visual_safe", False)
                     report = result.get("visual_report", "")
