@@ -14,7 +14,7 @@ from langgraph.graph import StateGraph, END
 
 load_dotenv()
 
-_PROMPT_DIR = Path(__file__).parent / "prompts"
+_PROMPT_DIR = Path(__file__).parent.parent / "prompts"
 
 def _load_prompt(name: str) -> str:
     return (_PROMPT_DIR / name).read_text(encoding="utf-8")
