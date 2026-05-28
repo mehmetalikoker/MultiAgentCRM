@@ -15,17 +15,17 @@ from langgraph.graph import StateGraph, END
 load_dotenv()
 
 _PROMPT_DIR = Path(__file__).parent.parent / "prompts"
+_DATA_DIR = Path(__file__).parent.parent / "data"
 
 def _load_prompt(name: str) -> str:
     return (_PROMPT_DIR / name).read_text(encoding="utf-8")
 
-# Fallback: dosya yüklenmezse kullanılacak mock mevzuat
-_fallback_regulations = [
-    "BDDK yönetmeliğine göre faiz oranı kampanya görselinde en az 10 punto büyüklüğünde belirtilmelidir.",
-    "Tüketiciyi Koruma Kanunu: Kampanya bitiş tarihi açıkça belirtilmek zorundadır.",
-    "Yanıltıcı reklam içeren kampanyalar BDDK tarafından 100.000 TL'ye kadar cezalandırılabilir.",
-    "Zorunlu açıklamalar (masraf, komisyon, vb.) kampanya metninde yer almalıdır.",
-]
+def _load_regulations(name: str) -> list[str]:
+    lines = (_DATA_DIR / name).read_text(encoding="utf-8").splitlines()
+    return [l.strip() for l in lines if l.strip()]
+
+# Fallback: kullanıcı belge yüklemezse kullanılacak varsayılan mevzuat
+_fallback_regulations = _load_regulations("regulations_legal.txt")
 
 class AgentState(TypedDict):
     campaign_text: str

@@ -18,18 +18,17 @@ from langgraph.graph import StateGraph, END
 load_dotenv()
 
 _PROMPT_DIR = Path(__file__).parent.parent / "prompts"
+_DATA_DIR = Path(__file__).parent.parent / "data"
 
 def _load_prompt(name: str) -> str:
     return (_PROMPT_DIR / name).read_text(encoding="utf-8")
 
-# --- 1. RAG: MEVZUAT VERİTABANI (MOCK) ---
-# Gerçekte burası PDF'lerden veya banka rehberinden beslenecek
-regulations_data = [
-    "Bankacılık kampanyalarında 'Bedava' kelimesi kullanılamaz, 'Masrafsız' veya 'Ücretsiz' denmelidir.",
-    "Faiz oranları belirtilirken yıllık maliyet oranı mutlaka parantez içinde verilmelidir.",
-    "Kredi kampanyalarında 'Kesin onay' veya 'Anında hesapta' gibi yanıltıcı ifadeler yasaktır.",
-    "Kampanya bitiş tarihi ve katılım koşulları metinde açıkça belirtilmelidir."
-]
+def _load_regulations(name: str) -> list[str]:
+    lines = (_DATA_DIR / name).read_text(encoding="utf-8").splitlines()
+    return [l.strip() for l in lines if l.strip()]
+
+# --- 1. RAG: MEVZUAT VERİTABANI ---
+regulations_data = _load_regulations("regulations_compliance.txt")
 
 vectorstore = Chroma.from_texts(
     texts=regulations_data,

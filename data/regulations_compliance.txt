@@ -1,0 +1,4 @@
+Bankacılık kampanyalarında 'Bedava' kelimesi kullanılamaz, 'Masrafsız' veya 'Ücretsiz' denmelidir.
+Faiz oranları belirtilirken yıllık maliyet oranı mutlaka parantez içinde verilmelidir.
+Kredi kampanyalarında 'Kesin onay' veya 'Anında hesapta' gibi yanıltıcı ifadeler yasaktır.
+Kampanya bitiş tarihi ve katılım koşulları metinde açıkça belirtilmelidir.
