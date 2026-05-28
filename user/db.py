@@ -1,32 +1,21 @@
 # -*- coding: utf-8 -*-
-import os
-import json
 import hashlib
+from user.mongo import get_db
 
-_USERS_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "users.json")
+
+def _col():
+    return get_db()["users"]
 
 
 def load_users() -> dict:
-    if not os.path.exists(_USERS_FILE):
-        return {}
-    with open(_USERS_FILE, "r", encoding="utf-8") as f:
-        return {u["username"]: u for u in json.load(f).get("users", [])}
+    return {u["username"]: u for u in _col().find({}, {"_id": 0})}
 
 
 def load_users_list() -> list:
-    if not os.path.exists(_USERS_FILE):
-        return []
-    with open(_USERS_FILE, "r", encoding="utf-8") as f:
-        return json.load(f).get("users", [])
-
-
-def _save(users: list):
-    with open(_USERS_FILE, "w", encoding="utf-8") as f:
-        json.dump({"users": users}, f, ensure_ascii=False, indent=2)
+    return list(_col().find({}, {"_id": 0}))
 
 
 def add_user(username: str, password: str, display_name: str, email: str = "") -> None:
-    users = load_users_list()
     entry = {
         "username": username,
         "password_hash": hashlib.sha256(password.encode()).hexdigest(),
@@ -34,74 +23,44 @@ def add_user(username: str, password: str, display_name: str, email: str = "") -
     }
     if email:
         entry["email"] = email.strip().lower()
-    users.append(entry)
-    _save(users)
+    _col().insert_one(entry)
 
 
 def update_password(username: str, new_password: str) -> None:
-    users = load_users_list()
-    for u in users:
-        if u["username"] == username:
-            u["password_hash"] = hashlib.sha256(new_password.encode()).hexdigest()
-            break
-    _save(users)
+    _col().update_one(
+        {"username": username},
+        {"$set": {"password_hash": hashlib.sha256(new_password.encode()).hexdigest()}},
+    )
 
 
 def get_user_by_email(email: str) -> dict | None:
-    for u in load_users_list():
-        if u.get("email", "").lower() == email.strip().lower():
-            return u
-    return None
+    return _col().find_one({"email": email.strip().lower()}, {"_id": 0})
 
 
 def set_user_email(username: str, email: str) -> None:
-    users = load_users_list()
-    for u in users:
-        if u["username"] == username:
-            u["email"] = email.strip().lower()
-            break
-    _save(users)
+    _col().update_one({"username": username}, {"$set": {"email": email.strip().lower()}})
 
 
 def delete_user(username: str) -> None:
-    _save([u for u in load_users_list() if u["username"] != username])
+    _col().delete_one({"username": username})
 
 
 def lock_user(username: str) -> None:
-    users = load_users_list()
-    for u in users:
-        if u["username"] == username:
-            u["locked"] = True
-            break
-    _save(users)
+    _col().update_one({"username": username}, {"$set": {"locked": True}})
 
 
 def unlock_user(username: str) -> None:
-    users = load_users_list()
-    for u in users:
-        if u["username"] == username:
-            u.pop("locked", None)
-            break
-    _save(users)
+    _col().update_one({"username": username}, {"$unset": {"locked": ""}})
 
 
 def set_active_token(username: str, token_id: str) -> None:
-    users = load_users_list()
-    for u in users:
-        if u["username"] == username:
-            u["active_token_id"] = token_id
-            break
-    _save(users)
+    _col().update_one({"username": username}, {"$set": {"active_token_id": token_id}})
 
 
 def get_active_token(username: str) -> str | None:
-    return load_users().get(username, {}).get("active_token_id")
+    user = _col().find_one({"username": username}, {"active_token_id": 1, "_id": 0})
+    return user.get("active_token_id") if user else None
 
 
 def clear_active_token(username: str) -> None:
-    users = load_users_list()
-    for u in users:
-        if u["username"] == username:
-            u.pop("active_token_id", None)
-            break
-    _save(users)
+    _col().update_one({"username": username}, {"$unset": {"active_token_id": ""}})

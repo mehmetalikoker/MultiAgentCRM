@@ -1,29 +1,13 @@
 # -*- coding: utf-8 -*-
-"""
-Arama geçmişi kayıt modülü.
-Her denetim sonucu state/audit_log.json dosyasına eklenir.
-"""
-import json
-import os
 from datetime import datetime, timezone
-from pathlib import Path
 
-_LOG_FILE = Path(__file__).parent.parent / "state" / "audit_log.json"
 _MAX_TEXT_PREVIEW = 200
 _MAX_SUMMARY = 3000
 
 
-def _load() -> list:
-    if not _LOG_FILE.exists():
-        return []
-    try:
-        return json.loads(_LOG_FILE.read_text(encoding="utf-8"))
-    except (json.JSONDecodeError, OSError):
-        return []
-
-
-def _save(entries: list) -> None:
-    _LOG_FILE.write_text(json.dumps(entries, ensure_ascii=False, indent=2), encoding="utf-8")
+def _col():
+    from user.mongo import get_db
+    return get_db()["audit_logs"]
 
 
 def log_audit(
@@ -37,8 +21,7 @@ def log_audit(
     channel: str | None = None,
     result_summary: str = "",
 ) -> None:
-    entries = _load()
-    entries.append({
+    _col().insert_one({
         "timestamp": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S"),
         "username": username,
         "agent": agent,
@@ -49,9 +32,7 @@ def log_audit(
         "score": score,
         "result_summary": result_summary[:_MAX_SUMMARY],
     })
-    _save(entries)
 
 
 def load_audit_log() -> list:
-    """Geçmiş kayıtları yeniden yüklenir, en yenisi önde."""
-    return list(reversed(_load()))
+    return list(_col().find({}, {"_id": 0}).sort("timestamp", -1))
