@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 import streamlit as st
+import pandas as pd
+import altair as alt
 from collections import Counter
+from datetime import datetime, timezone, timedelta
 from agents.audit_logger import load_audit_log
 
 _AGENT_LABELS = {
@@ -22,20 +25,51 @@ def compute_summary(logs: list) -> dict:
     return {"total": total, "safe": safe, "unsafe": unsafe, "safe_rate": safe_rate}
 
 
-def compute_agent_counts(logs: list) -> Counter:
-    return Counter(e.get("agent", "—") for e in logs)
+def _trend_df(logs: list, days: int = 7) -> pd.DataFrame:
+    cutoff = datetime.now(timezone.utc) - timedelta(days=days)
+    date_counts: Counter = Counter()
+    safe_counts: Counter = Counter()
+    unsafe_counts: Counter = Counter()
+
+    for e in logs:
+        try:
+            dt = datetime.strptime(e["timestamp"], "%Y-%m-%dT%H:%M:%S").replace(tzinfo=timezone.utc)
+        except (KeyError, ValueError):
+            continue
+        if dt < cutoff:
+            continue
+        day = dt.strftime("%m/%d")
+        date_counts[day] += 1
+        if e.get("is_safe") is True:
+            safe_counts[day] += 1
+        elif e.get("is_safe") is False:
+            unsafe_counts[day] += 1
+
+    all_days = []
+    for i in range(days):
+        d = (datetime.now(timezone.utc) - timedelta(days=days - 1 - i)).strftime("%m/%d")
+        all_days.append(d)
+
+    rows = []
+    for d in all_days:
+        rows.append({"Tarih": d, "Tür": "Uygun",    "Adet": safe_counts.get(d, 0)})
+        rows.append({"Tarih": d, "Tür": "Uygunsuz", "Adet": unsafe_counts.get(d, 0)})
+
+    return pd.DataFrame(rows)
 
 
-def compute_model_counts(logs: list) -> Counter:
-    return Counter(e.get("model", "—") for e in logs)
+def _model_df(logs: list) -> pd.DataFrame:
+    counts = Counter(e.get("model", "—") for e in logs)
+    return pd.DataFrame(
+        [{"Model": k, "Kullanım": v} for k, v in counts.most_common()],
+    )
 
 
-def compute_user_stats(logs: list) -> dict:
-    return {
-        "total":  Counter(e.get("username") for e in logs),
-        "safe":   Counter(e.get("username") for e in logs if e.get("is_safe") is True),
-        "unsafe": Counter(e.get("username") for e in logs if e.get("is_safe") is False),
-    }
+def _agent_df(logs: list) -> pd.DataFrame:
+    counts = Counter(e.get("agent", "—") for e in logs)
+    return pd.DataFrame(
+        [{"Denetim Türü": get_agent_label(k), "Adet": v} for k, v in counts.most_common()],
+    )
 
 
 def render():
@@ -47,6 +81,7 @@ def render():
         st.info("Henüz denetim kaydı yok.")
         return
 
+    # ── Özet metrikler ────────────────────────────────────────────────────────
     summary = compute_summary(logs)
     c1, c2, c3, c4 = st.columns(4)
     c1.metric("Toplam Denetim", summary["total"])
@@ -56,35 +91,87 @@ def render():
 
     st.markdown("---")
 
-    col_agent, col_model = st.columns(2)
+    # ── Son 7 gün trend ───────────────────────────────────────────────────────
+    st.subheader("Son 7 Gün Denetim Trendi")
 
-    with col_agent:
-        st.markdown("**Denetim Türü Dağılımı**")
-        for agent, count in compute_agent_counts(logs).most_common():
-            st.markdown(f"- {get_agent_label(agent)}: **{count}**")
-
-    with col_model:
-        st.markdown("**Model Kullanım Dağılımı**")
-        for model, count in compute_model_counts(logs).most_common():
-            st.markdown(f"- {model}: **{count}**")
+    trend = _trend_df(logs, days=7)
+    if trend["Adet"].sum() == 0:
+        st.info("Son 7 günde denetim kaydı yok.")
+    else:
+        chart = (
+            alt.Chart(trend)
+            .mark_bar()
+            .encode(
+                x=alt.X("Tarih:O", sort=None, title="Tarih"),
+                y=alt.Y("Adet:Q", title="Denetim Sayısı"),
+                color=alt.Color(
+                    "Tür:N",
+                    scale=alt.Scale(
+                        domain=["Uygun", "Uygunsuz"],
+                        range=["#2ecc71", "#e74c3c"],
+                    ),
+                    legend=alt.Legend(title="Sonuç"),
+                ),
+                tooltip=["Tarih", "Tür", "Adet"],
+            )
+            .properties(height=260)
+        )
+        st.altair_chart(chart, use_container_width=True)
 
     st.markdown("---")
-    st.markdown("**Kullanıcı Bazında Aktivite**")
 
-    user_stats  = compute_user_stats(logs)
-    user_total  = user_stats["total"]
-    user_safe   = user_stats["safe"]
-    user_unsafe = user_stats["unsafe"]
+    # ── Model ve Agent dağılımı ───────────────────────────────────────────────
+    col_model, col_agent = st.columns(2)
 
-    header_cols = st.columns([2, 2, 2, 2])
-    header_cols[0].markdown("**Kullanıcı**")
-    header_cols[1].markdown("**Toplam**")
-    header_cols[2].markdown("**Uygun**")
-    header_cols[3].markdown("**Uygunsuz**")
+    with col_model:
+        st.subheader("Model Kullanımı")
+        model_df = _model_df(logs)
+        if not model_df.empty:
+            chart = (
+                alt.Chart(model_df)
+                .mark_bar(color="#FF6200")
+                .encode(
+                    x=alt.X("Kullanım:Q", title="Kullanım Sayısı"),
+                    y=alt.Y("Model:N", sort="-x", title=""),
+                    tooltip=["Model", "Kullanım"],
+                )
+                .properties(height=200)
+            )
+            st.altair_chart(chart, use_container_width=True)
 
+    with col_agent:
+        st.subheader("Denetim Türü")
+        agent_df = _agent_df(logs)
+        if not agent_df.empty:
+            chart = (
+                alt.Chart(agent_df)
+                .mark_bar(color="#3498db")
+                .encode(
+                    x=alt.X("Adet:Q", title="Denetim Sayısı"),
+                    y=alt.Y("Denetim Türü:N", sort="-x", title=""),
+                    tooltip=["Denetim Türü", "Adet"],
+                )
+                .properties(height=200)
+            )
+            st.altair_chart(chart, use_container_width=True)
+
+    st.markdown("---")
+
+    # ── Kullanıcı bazında aktivite ────────────────────────────────────────────
+    st.subheader("Kullanıcı Bazında Aktivite")
+
+    user_total  = Counter(e.get("username") for e in logs)
+    user_safe   = Counter(e.get("username") for e in logs if e.get("is_safe") is True)
+    user_unsafe = Counter(e.get("username") for e in logs if e.get("is_safe") is False)
+
+    rows = []
     for username in sorted(user_total, key=lambda u: -user_total[u]):
-        row = st.columns([2, 2, 2, 2])
-        row[0].markdown(username)
-        row[1].markdown(str(user_total[username]))
-        row[2].markdown(str(user_safe.get(username, 0)))
-        row[3].markdown(str(user_unsafe.get(username, 0)))
+        rows.append({
+            "Kullanıcı":  username,
+            "Toplam":     user_total[username],
+            "Uygun":      user_safe.get(username, 0),
+            "Uygunsuz":   user_unsafe.get(username, 0),
+        })
+
+    if rows:
+        st.dataframe(pd.DataFrame(rows), use_container_width=True, hide_index=True)
