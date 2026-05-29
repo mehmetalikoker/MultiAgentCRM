@@ -22,12 +22,13 @@ def _secret() -> str:
     return s
 
 
-def create_jwt(username: str, display_name: str) -> tuple[str, str]:
+def create_jwt(username: str, display_name: str, role: str = "user") -> tuple[str, str]:
     """JWT token ve token_id döndürür. token_id sunucuda saklanmalı."""
     token_id = str(uuid.uuid4())
     payload = {
         "sub": username,
         "display_name": display_name,
+        "role": role,
         "tid": token_id,
         "exp": datetime.now(timezone.utc) + timedelta(hours=_EXPIRY_HOURS),
         "iat": datetime.now(timezone.utc),

@@ -195,12 +195,14 @@ html, body, [data-testid="stAppViewContainer"] {
                 elif _check_credentials(username, password):
                     record_success(username)
                     display = user_record.get("display_name", username)
-                    jwt_token, token_id = create_jwt(username, display)
+                    role = user_record.get("role", "user")
+                    jwt_token, token_id = create_jwt(username, display, role)
                     set_active_token(username, token_id)
                     _cookie.set("crm_auth", jwt_token, max_age=8 * 3600)
                     st.session_state["authenticated"] = True
                     st.session_state["username"] = username
                     st.session_state["display_name"] = display
+                    st.session_state["role"] = role
                     st.session_state["token_id"] = token_id
                     st.rerun()
                 else:
@@ -234,6 +236,7 @@ if not st.session_state.get("authenticated"):
             st.session_state["authenticated"] = True
             st.session_state["username"] = _payload["sub"]
             st.session_state["display_name"] = _payload["display_name"]
+            st.session_state["role"] = _payload.get("role", "user")
             st.session_state["token_id"] = _payload["tid"]
             st.rerun()
         else:
@@ -306,7 +309,7 @@ st.markdown(
 )
 st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
 
-is_admin = st.session_state.get("username") == "admin"
+is_admin = st.session_state.get("role") == "admin"
 
 if is_admin:
     from ui.tab_gecmis import render as render_gecmis

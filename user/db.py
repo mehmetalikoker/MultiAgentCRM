@@ -15,15 +15,20 @@ def load_users_list() -> list:
     return list(_col().find({}, {"_id": 0}))
 
 
-def add_user(username: str, password: str, display_name: str, email: str = "") -> None:
+def add_user(username: str, password: str, display_name: str, email: str = "", role: str = "user") -> None:
     entry = {
         "username": username,
         "password_hash": hashlib.sha256(password.encode()).hexdigest(),
         "display_name": display_name or username,
+        "role": role,
     }
     if email:
         entry["email"] = email.strip().lower()
     _col().insert_one(entry)
+
+
+def set_user_role(username: str, role: str) -> None:
+    _col().update_one({"username": username}, {"$set": {"role": role}})
 
 
 def update_password(username: str, new_password: str) -> None:
