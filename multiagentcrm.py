@@ -302,14 +302,22 @@ with st.sidebar:
         st.warning("⚠️ Seçili model görsel denetimi desteklemiyor.")
 
     st.markdown("---")
-st.markdown(
-    "<h1 style='color:#FF6200; font-size:2.4rem; border-bottom: 3px solid #FF6200; "
-    "padding-bottom:10px; display:block;'>Agentic CRM</h1>",
-    unsafe_allow_html=True
-)
-st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
-
 is_admin = st.session_state.get("role") == "admin"
+
+if is_admin:
+    st.markdown(
+        "<h1 style='color:#FF6200; font-size:2.4rem; border-bottom: 3px solid #FF6200; "
+        "padding-bottom:10px; display:block;'>Agentic CRM "
+        "<span style='font-size:1.2rem; color:#888; font-weight:400;'>Yönetim Paneli</span></h1>",
+        unsafe_allow_html=True
+    )
+else:
+    st.markdown(
+        "<h1 style='color:#FF6200; font-size:2.4rem; border-bottom: 3px solid #FF6200; "
+        "padding-bottom:10px; display:block;'>Agentic CRM</h1>",
+        unsafe_allow_html=True
+    )
+st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
 
 if is_admin:
     from ui.tab_gecmis import render as render_gecmis
