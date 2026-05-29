@@ -313,7 +313,7 @@ if is_admin:
     from ui.tab_istatistik import render as render_istatistik
     from ui.tab_yonetim_paneli import render as render_yonetim
 
-    tabs = st.tabs(["📋 Denetim Geçmişi", "📊 Denetim İstatistikleri", "⚙️ Yönetim Paneli"])
+    tabs = st.tabs(["📋 Arama Geçmişi", "📊 Arama İstatistikleri", "⚙️ Yönetim Paneli"])
     with tabs[0]:
         render_gecmis()
     with tabs[1]:

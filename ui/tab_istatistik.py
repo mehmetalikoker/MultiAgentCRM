@@ -73,7 +73,7 @@ def _agent_df(logs: list) -> pd.DataFrame:
 
 
 def render():
-    st.header("Denetim İstatistikleri")
+    st.header("Arama İstatistikleri")
 
     logs = load_audit_log()
 
