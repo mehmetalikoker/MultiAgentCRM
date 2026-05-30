@@ -58,6 +58,22 @@ def _trend_df(logs: list, days: int = 7) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
+def compute_agent_counts(logs: list) -> Counter:
+    return Counter(e.get("agent", "—") for e in logs)
+
+
+def compute_model_counts(logs: list) -> Counter:
+    return Counter(e.get("model", "—") for e in logs)
+
+
+def compute_user_stats(logs: list) -> dict:
+    return {
+        "total":  Counter(e.get("username") for e in logs),
+        "safe":   Counter(e.get("username") for e in logs if e.get("is_safe") is True),
+        "unsafe": Counter(e.get("username") for e in logs if e.get("is_safe") is False),
+    }
+
+
 def _model_df(logs: list) -> pd.DataFrame:
     counts = Counter(e.get("model", "—") for e in logs)
     return pd.DataFrame(

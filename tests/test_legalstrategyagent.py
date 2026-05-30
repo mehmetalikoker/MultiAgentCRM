@@ -43,7 +43,7 @@ class TestLegalStrategyAuditor:
         result = self._run_auditor(state, content)
         assert result["final_score"] == 78
 
-    def test_score_defaults_to_85_when_not_in_response(self):
+    def test_score_defaults_to_50_when_not_in_response(self):
         state = {
             "campaign_text": "Kampanya metni.",
             "selected_model": "gpt-4o",
@@ -51,7 +51,7 @@ class TestLegalStrategyAuditor:
         }
         content = "Risk Seviyesi: Düşük\nBu yanıtta puan yok."
         result = self._run_auditor(state, content)
-        assert result["final_score"] == 85
+        assert result["final_score"] == 50
 
     def test_score_clamped_to_100_max(self):
         state = {
@@ -63,8 +63,8 @@ class TestLegalStrategyAuditor:
         result = self._run_auditor(state, content)
         assert result["final_score"] == 100
 
-    def test_score_strips_minus_sign_from_negative_value(self):
-        # filter(str.isdigit) eksi işaretini atar; "-10" → "10" olarak parse edilir
+    def test_negative_score_not_parsed_returns_default(self):
+        # Regex sadece \d{1,3} yakaladığı için negatif değer eşleşmez → default 50
         state = {
             "campaign_text": "Kampanya.",
             "selected_model": "gpt-4o",
@@ -72,7 +72,7 @@ class TestLegalStrategyAuditor:
         }
         content = "Final Uygunluk Puanı: -10"
         result = self._run_auditor(state, content)
-        assert result["final_score"] == 10
+        assert result["final_score"] == 50
 
     def test_uses_fallback_regulations_when_no_documents(self, mock_chroma_and_embeddings):
         state = {
