@@ -17,6 +17,20 @@ def mock_chroma_and_embeddings():
 
 
 class TestComplianceChecker:
+    """
+    compliance_checker(state) LangGraph node fonksiyonunu test eder.
+
+    Bu fonksiyon, kampanya metnini bankacılık kurallarına göre denetler.
+    LLM'e RAG bağlamıyla birlikte prompt gönderir, dönen JSON yanıtı ayrıştırır
+    ve state'e compliance_report, is_safe, suggestions yazar.
+
+    Test edilen senaryolar:
+    - LLM yanıtında is_safe:true olduğunda state'e True yazılması
+    - LLM yanıtında is_safe:false olduğunda state'e False yazılması
+    - Tam compliance_report metninin state'e kaydedilmesi
+    - selected_model belirtilmediğinde varsayılan modelin (gpt-4o) kullanılması
+    - channel belirtilmediğinde "Belirtilmedi" varsayılanının prompt'a gitmesi
+    """
     def _make_llm_response(self, content: str) -> MagicMock:
         response = MagicMock()
         response.content = content
@@ -105,6 +119,19 @@ class TestComplianceChecker:
 
 
 class TestRegulationsData:
+    """
+    regulations_data listesini test eder.
+
+    Bu liste data/regulations_compliance.txt dosyasından yüklenir ve
+    ChromaDB vektör veritabanına beslenerek RAG bağlamı oluşturur.
+    Dosya içeriğinin beklenen bankacılık kurallarını içerdiğini doğrular.
+
+    Test edilen senaryolar:
+    - Listenin boş olmaması
+    - "Bedava" kelimesiyle ilgili kuralın mevcut olması
+    - Faiz oranı kuralının mevcut olması
+    - Tüm elemanların string tipinde olması
+    """
     def test_regulations_list_is_not_empty(self):
         from agents.campaigntextagent import regulations_data
         assert len(regulations_data) > 0
@@ -125,6 +152,15 @@ class TestRegulationsData:
 
 
 class TestAgentStateSchema:
+    """
+    CampaignTextAgent AgentState TypedDict şemasını test eder.
+
+    LangGraph state'i belirli anahtarların varlığına bağımlıdır.
+    Bu testler şema değişikliklerinin farkında olmadan kırılmasını engeller.
+
+    Test edilen senaryolar:
+    - AgentState'in zorunlu alan anahtarlarını içermesi
+    """
     def test_agent_state_has_required_keys(self):
         from agents.campaigntextagent import AgentState
         annotations = AgentState.__annotations__

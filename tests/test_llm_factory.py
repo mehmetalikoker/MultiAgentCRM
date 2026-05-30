@@ -4,6 +4,22 @@ from unittest.mock import patch, MagicMock
 
 
 class TestGetLlm:
+    """
+    get_llm(model, temperature) fonksiyonunu test eder.
+
+    Bu fonksiyon, model adına göre doğru LangChain LLM sınıfını örnekleyip
+    döndürür. Projedeki tüm agentlar bu factory fonksiyonu üzerinden LLM alır,
+    böylece model seçimi tek noktadan yönetilir.
+
+    Test edilen senaryolar:
+    - "gpt-*" model adlarının ChatOpenAI ile yönlendirilmesi
+    - "claude-*" model adlarının ChatAnthropic ile yönlendirilmesi
+    - "gemini-*" model adlarının ChatGoogleGenerativeAI ile yönlendirilmesi
+    - "deepseek-*" model adlarının özel base_url ile ChatOpenAI'ye yönlendirilmesi
+    - Bilinmeyen model adlarının varsayılan olarak ChatOpenAI'ye düşmesi
+    - Özel temperature değerinin ilgili sınıfa iletilmesi
+    - API key ve base_url gibi yapılandırma parametrelerinin doğru aktarılması
+    """
     def test_gpt_model_returns_chatopenai(self):
         mock_instance = MagicMock()
         with patch("langchain_openai.ChatOpenAI", return_value=mock_instance) as mock_cls:

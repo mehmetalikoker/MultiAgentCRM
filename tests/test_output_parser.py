@@ -4,6 +4,20 @@ from agents.output_parser import parse_compliance_response, parse_visual_respons
 
 
 class TestParseComplianceResponse:
+    """
+    parse_compliance_response(content) fonksiyonunu test eder.
+
+    Bu fonksiyon, LLM'in metin uyum denetimi (compliance) sonucu olarak döndürdüğü
+    ham string'i ayrıştırır ve (is_safe: bool, suggestions: list) tuple'ı döndürür.
+
+    Test edilen senaryolar:
+    - Geçerli JSON formatındaki yanıtlar (is_safe: true/false, suggestions listesi)
+    - is_safe değerinin string ("true"/"false") veya bool olarak gelmesi
+    - LLM'in yanıtı Markdown kod bloğuna (```json ... ```) sardığı durumlar
+    - JSON parse başarısız olduğunda regex ile is_safe alanının bulunması (fallback)
+    - "untrue" gibi kelimelerde yanlış pozitif vermemesi
+    - Boş, bozuk veya is_safe alanı olmayan yanıtlarda fail-closed davranışı (False döner)
+    """
 
     # ── Temiz JSON ────────────────────────────────────────────────────────────
 
@@ -104,6 +118,20 @@ class TestParseComplianceResponse:
 
 
 class TestParseVisualResponse:
+    """
+    parse_visual_response(content) fonksiyonunu test eder.
+
+    Bu fonksiyon, LLM'in görsel denetim sonucu olarak döndürdüğü serbest metin
+    yanıtını analiz ederek görselin uygun olup olmadığını (bool) döndürür.
+
+    Test edilen senaryolar:
+    - "Sorun yok", "Hata yok", "tutarlı" gibi güvenli ifadelerin True döndürmesi
+    - "Tutarsızlık", "hata", "uyumsuz" gibi problem ifadelerinin False döndürmesi
+    - "Tutarsızlıklar:" gibi bölüm etiketlerinin yanlış pozitife yol açmaması
+    - Hem Türkçe hem İngilizce yanıtların doğru yorumlanması
+    - Boş veya belirsiz yanıtlarda fail-closed davranışı (False döner)
+    - Eşit sayıda güvenli/problem sinyal olduğunda fail-closed davranışı
+    """
 
     # ── Güvenli çıktılar ──────────────────────────────────────────────────────
 
@@ -157,6 +185,20 @@ class TestParseVisualResponse:
 
 
 class TestParseLegalScore:
+    """
+    parse_legal_score(content) fonksiyonunu test eder.
+
+    Bu fonksiyon, LLM'in hukuk ve strateji denetimi sonucu olarak döndürdüğü
+    serbest metin yanıtından 0-100 arasında bir uygunluk puanı çıkarır.
+
+    Test edilen senaryolar:
+    - "Final Uygunluk Puanı: 92" gibi Türkçe etiketlerden puan okuma
+    - "score: 88" gibi İngilizce etiketlerden puan okuma
+    - Büyük/küçük harf duyarsızlığı
+    - 100'ü aşan değerlerin 100'e, 0'ın altındaki değerlerin 0'a sabitlenmesi
+    - Yanıtta puan bulunamaması durumunda nötr varsayılan (50) döndürülmesi
+    - Eski iyimser varsayılan (85) davranışının artık geçersiz olduğunun doğrulanması
+    """
 
     # ── Başarılı parse ────────────────────────────────────────────────────────
 

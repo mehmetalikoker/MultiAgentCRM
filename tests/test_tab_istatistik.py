@@ -25,6 +25,18 @@ def _entry(username="user1", agent="compliance", model="claude-sonnet-4-6",
 
 # ─────────────────────────────────────────────────────────────────────────────
 class TestGetAgentLabel:
+    """
+    get_agent_label(agent) fonksiyonunu test eder.
+
+    Dahili agent anahtarını ("compliance", "visual", "legal") kullanıcıya
+    gösterilen Türkçe etikete dönüştürür. İstatistik ve geçmiş sekmelerinde
+    grafikler ve tablolar için kullanılır.
+
+    Test edilen senaryolar:
+    - Her agent anahtarının doğru Türkçe karşılığına dönüştürülmesi
+    - Bilinmeyen agent anahtarının olduğu gibi (fallback) döndürülmesi
+    - Boş string için boş string döndürülmesi
+    """
 
     def test_compliance_returns_turkish_label(self):
         assert get_agent_label("compliance") == "Metin Denetimi"
@@ -44,6 +56,20 @@ class TestGetAgentLabel:
 
 # ─────────────────────────────────────────────────────────────────────────────
 class TestComputeSummary:
+    """
+    compute_summary(logs) fonksiyonunu test eder.
+
+    Tüm denetim kayıtlarından toplam, uygun, uygunsuz sayısı ve
+    uygunluk oranını hesaplar. İstatistik sekmesinin üst kısmındaki
+    4 metrik kartı bu verilerle doldurulur.
+
+    Test edilen senaryolar:
+    - Boş log listesinde tüm değerlerin sıfır olması
+    - Toplam, uygun ve uygunsuz sayılarının doğru hesaplanması
+    - Uygunluk oranının yüzde olarak yuvarlanması (%100, %0, %33)
+    - is_safe:None kayıtların ne uygun ne uygunsuz sayılmaması
+    - Tümü None olan kayıtlarda oran sıfır olması
+    """
 
     def test_empty_logs_returns_zeros(self):
         result = compute_summary([])
@@ -88,6 +114,20 @@ class TestComputeSummary:
 
 # ─────────────────────────────────────────────────────────────────────────────
 class TestComputeAgentCounts:
+    """
+    compute_agent_counts(logs) fonksiyonunu test eder.
+
+    Her agent türünün (compliance, visual, legal) kaç kez kullanıldığını
+    Counter olarak döndürür. İstatistik sekmesindeki "Denetim Türü" grafiğine
+    veri sağlar.
+
+    Test edilen senaryolar:
+    - Boş listede boş Counter döndürülmesi
+    - Tek agent türünün doğru sayılması
+    - Birden fazla agent türünün ayrı ayrı sayılması
+    - agent anahtarı eksik kayıtların "—" olarak sayılması
+    - En çok kullanılan agent'ın most_common'da ilk sırada olması
+    """
 
     def test_empty_logs_returns_empty_counter(self):
         assert compute_agent_counts([]) == Counter()
@@ -121,6 +161,19 @@ class TestComputeAgentCounts:
 
 # ─────────────────────────────────────────────────────────────────────────────
 class TestComputeModelCounts:
+    """
+    compute_model_counts(logs) fonksiyonunu test eder.
+
+    Her LLM modelinin kaç denetimde kullanıldığını Counter olarak döndürür.
+    İstatistik sekmesindeki "Model Kullanımı" grafiğine veri sağlar.
+
+    Test edilen senaryolar:
+    - Boş listede boş Counter döndürülmesi
+    - Tek modelin doğru sayılması
+    - Birden fazla modelin ayrı ayrı sayılması
+    - model anahtarı eksik kayıtların "—" olarak sayılması
+    - En çok kullanılan modelin most_common'da ilk sırada olması
+    """
 
     def test_empty_logs_returns_empty_counter(self):
         assert compute_model_counts([]) == Counter()
@@ -151,6 +204,21 @@ class TestComputeModelCounts:
 
 # ─────────────────────────────────────────────────────────────────────────────
 class TestComputeUserStats:
+    """
+    compute_user_stats(logs) fonksiyonunu test eder.
+
+    Kullanıcı başına toplam, uygun ve uygunsuz denetim sayısını ayrı
+    Counter'lar halinde döndürür. İstatistik sekmesinin alt kısmındaki
+    kullanıcı aktivite tablosuna veri sağlar.
+
+    Test edilen senaryolar:
+    - Boş listede tüm Counter'ların boş olması
+    - Kullanıcı başına toplam sayının doğru hesaplanması
+    - Kullanıcı başına uygun ve uygunsuz sayılarının ayrı izlenmesi
+    - is_safe:None kayıtların ne uygun ne uygunsuz sayısına eklenmemesi
+    - Çok kullanıcılı senaryoda tüm kullanıcıların izlenmesi
+    - Kullanıcıların toplam kullanıma göre azalan sırada sıralanabilmesi
+    """
 
     def test_empty_logs_returns_empty_counters(self):
         stats = compute_user_stats([])

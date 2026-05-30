@@ -12,6 +12,22 @@ def mock_col():
 
 
 class TestRecordFailure:
+    """
+    record_failure(username) fonksiyonunu test eder.
+
+    Her başarısız giriş denemesinde çağrılır. MongoDB'ye bir deneme belgesi
+    ekler; TTL index bu belgeyi 5 dakika sonra otomatik siler. 5 denemeye
+    ulaşıldığında hesabı kilitler ve True döndürür.
+
+    Test edilen senaryolar:
+    - Her çağrıda bir deneme dökümanı insert edilmesi
+    - Dökümanın kullanıcı adını küçük harfle kaydetmesi
+    - Dökümanın created_at alanı içermesi (TTL için zorunlu)
+    - Limit altında False döndürülmesi
+    - 5 denemeye ulaşıldığında True döndürülmesi
+    - 5 denemede lock_user çağrılması
+    - 5 denemede o kullanıcının tüm denemeleri silinmesi
+    """
 
     def test_inserts_attempt_document(self, mock_col):
         mock_col.count_documents.return_value = 1
@@ -65,6 +81,16 @@ class TestRecordFailure:
 
 
 class TestRecordSuccess:
+    """
+    record_success(username) fonksiyonunu test eder.
+
+    Başarılı girişte çağrılır ve o kullanıcıya ait tüm başarısız deneme
+    kayıtlarını MongoDB'den siler. Böylece sayaç sıfırlanır.
+
+    Test edilen senaryolar:
+    - Kullanıcının tüm denemelerinin silinmesi
+    - Kullanıcı adının küçük harfe dönüştürülerek sorgulanması
+    """
 
     def test_deletes_all_attempts_for_user(self, mock_col):
         from user.rate_limiter import record_success
@@ -75,6 +101,18 @@ class TestRecordSuccess:
 
 
 class TestAttemptsRemaining:
+    """
+    attempts_remaining(username) fonksiyonunu test eder.
+
+    Kullanıcının kalan giriş hakkını (5 - mevcut deneme sayısı) döndürür.
+    Bu değer giriş formunda uyarı göstermek için kullanılır.
+
+    Test edilen senaryolar:
+    - Kalan hakkın (max - mevcut) doğru hesaplanması
+    - Limite ulaşıldığında 0 döndürülmesi
+    - Limiti aştığında 0 döndürülmesi (negatif değil)
+    - Kullanıcı adının küçük harfe dönüştürülerek sorgulanması
+    """
 
     def test_returns_max_minus_count(self, mock_col):
         mock_col.count_documents.return_value = 2

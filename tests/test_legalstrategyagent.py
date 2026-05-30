@@ -16,6 +16,25 @@ def mock_chroma_and_embeddings():
 
 
 class TestLegalStrategyAuditor:
+    """
+    legal_strategy_auditor(state) LangGraph node fonksiyonunu test eder.
+
+    Bu fonksiyon, kampanya metnini yasal mevzuata göre denetler.
+    Kullanıcının yüklediği belgeler varsa bunları, yoksa varsayılan BDDK
+    mevzuatını ChromaDB'ye yükleyerek RAG bağlamı oluşturur.
+    LLM yanıtından 0-100 arası uygunluk puanı çıkarır.
+
+    Test edilen senaryolar:
+    - Denetim raporunun state'e kaydedilmesi
+    - LLM yanıtındaki puanın doğru parse edilmesi
+    - Yanıtta puan bulunamaması durumunda nötr varsayılan (50) kullanılması
+    - 100'ü aşan puanın 100'e sabitlenmesi
+    - Negatif puan içeren yanıtta varsayılan (50) döndürülmesi
+    - Belge yüklenmediğinde varsayılan mevzuatın kullanılması
+    - Belge yüklendiğinde kullanıcı belgelerinin kullanılması
+    - selected_model belirtilmediğinde varsayılan modelin (gpt-4o) kullanılması
+    - legal_documents None geldiğinde boş liste gibi davranılması
+    """
     def _run_auditor(self, state: dict, llm_response_content: str):
         mock_llm = MagicMock()
         mock_llm.invoke.return_value = MagicMock(content=llm_response_content)
@@ -139,6 +158,19 @@ class TestLegalStrategyAuditor:
 
 
 class TestFallbackRegulations:
+    """
+    _fallback_regulations listesini test eder.
+
+    Bu liste data/regulations_legal.txt dosyasından yüklenir ve kullanıcı
+    herhangi bir hukuki belge yüklemediğinde varsayılan RAG bağlamı olarak kullanılır.
+    BDDK ve Tüketiciyi Koruma Kanunu'na ait temel kuralları içermelidir.
+
+    Test edilen senaryolar:
+    - Listenin boş olmaması
+    - BDDK referansının mevcut olması
+    - Tüketici koruması referansının mevcut olması
+    - Tüm elemanların string tipinde olması
+    """
     def test_fallback_list_is_not_empty(self):
         from agents.legalstrategyagent import _fallback_regulations
         assert len(_fallback_regulations) > 0
@@ -159,6 +191,15 @@ class TestFallbackRegulations:
 
 
 class TestLegalAgentStateSchema:
+    """
+    LegalStrategyAgent AgentState TypedDict şemasını test eder.
+
+    LangGraph state'i belirli anahtarların varlığına bağımlıdır.
+    Bu test şema değişikliklerinin farkında olmadan kırılmasını engeller.
+
+    Test edilen senaryolar:
+    - AgentState'in zorunlu alan anahtarlarını içermesi
+    """
     def test_state_has_required_keys(self):
         from agents.legalstrategyagent import AgentState
         annotations = AgentState.__annotations__

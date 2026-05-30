@@ -11,6 +11,17 @@ def mock_col():
 
 
 class TestLoadUsers:
+    """
+    load_users() fonksiyonunu test eder.
+
+    MongoDB users collection'ındaki tüm kullanıcıları username'e göre
+    indekslenmiş dict olarak döndürür. Kimlik doğrulama sırasında
+    kullanıcı arama için kullanılır.
+
+    Test edilen senaryolar:
+    - Kullanıcıların username anahtarıyla dict'e dönüştürülmesi
+    - Boş collection için boş dict döndürülmesi
+    """
 
     def test_returns_dict_keyed_by_username(self, mock_col):
         mock_col.find.return_value = [
@@ -29,6 +40,17 @@ class TestLoadUsers:
 
 
 class TestLoadUsersList:
+    """
+    load_users_list() fonksiyonunu test eder.
+
+    MongoDB users collection'ındaki tüm kullanıcıları liste olarak döndürür.
+    Yönetim panelinde kullanıcı listesi göstermek için kullanılır.
+
+    Test edilen senaryolar:
+    - Dönen değerin liste olması
+    - Tüm kullanıcıların listede yer alması
+    - Boş collection için boş liste döndürülmesi
+    """
 
     def test_returns_list(self, mock_col):
         mock_col.find.return_value = [{"username": "ali"}, {"username": "veli"}]
@@ -44,6 +66,21 @@ class TestLoadUsersList:
 
 
 class TestAddUser:
+    """
+    add_user(username, password, display_name, email, role) fonksiyonunu test eder.
+
+    Yeni kullanıcıyı MongoDB users collection'ına ekler. Şifre hiçbir zaman
+    düz metin olarak saklanmaz; SHA-256 hash'i kaydedilir. E-posta opsiyoneldir.
+
+    Test edilen senaryolar:
+    - insert_one'ın doğru username ile çağrılması
+    - Şifrenin SHA-256 hash'i olarak saklanması (düz metin değil)
+    - Rol belirtilmediğinde varsayılan "user" rolünün kaydedilmesi
+    - "admin" rolünün doğru kaydedilmesi
+    - E-posta adresinin küçük harfe dönüştürülerek saklanması
+    - Boş e-posta için "email" alanının eklenmemesi
+    - display_name boş geldiğinde username'in kullanılması
+    """
 
     def test_insert_called_with_username(self, mock_col):
         from user.db import add_user
@@ -91,6 +128,19 @@ class TestAddUser:
 
 
 class TestActiveToken:
+    """
+    set/get/clear_active_token fonksiyonlarını test eder.
+
+    Tek aktif oturum mekanizmasının MongoDB tarafındaki katmanıdır.
+    Her girişte yeni token_id kaydedilir; başka cihazdan giriş yapıldığında
+    eski token_id geçersiz kalır ve o kullanıcı otomatik çıkış yapar.
+
+    Test edilen senaryolar:
+    - set_active_token'ın update_one çağırması
+    - get_active_token'ın token_id değerini döndürmesi
+    - Kullanıcı bulunamazsa get_active_token'ın None döndürmesi
+    - clear_active_token'ın $unset operatörü kullanması
+    """
 
     def test_set_active_token_calls_update(self, mock_col):
         from user.db import set_active_token
@@ -117,6 +167,16 @@ class TestActiveToken:
 
 
 class TestLockUnlock:
+    """
+    lock_user() ve unlock_user() fonksiyonlarını test eder.
+
+    5 başarısız giriş denemesinde hesap kilitlenir (rate_limiter tarafından tetiklenir).
+    Admin, yönetim panelinden hesabı tekrar aktif edebilir.
+
+    Test edilen senaryolar:
+    - lock_user'ın MongoDB'de locked:True ayarlaması
+    - unlock_user'ın MongoDB'de locked alanını kaldırması ($unset)
+    """
 
     def test_lock_user_sets_locked_true(self, mock_col):
         from user.db import lock_user
@@ -132,6 +192,16 @@ class TestLockUnlock:
 
 
 class TestSetUserRole:
+    """
+    set_user_role(username, role) fonksiyonunu test eder.
+
+    Yönetim panelinden kullanıcının rolünü "admin" veya "user" olarak günceller.
+    Rol değişikliği anında MongoDB'ye yazılır; bir sonraki girişte JWT'ye yansır.
+
+    Test edilen senaryolar:
+    - Kullanıcıya "admin" rolü atanması
+    - Kullanıcıdan "admin" rolünün alınıp "user" yapılması
+    """
 
     def test_set_user_role_admin(self, mock_col):
         from user.db import set_user_role

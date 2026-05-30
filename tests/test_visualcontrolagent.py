@@ -5,6 +5,19 @@ from unittest.mock import patch, MagicMock
 
 
 class TestEncodeImage:
+    """
+    encode_image(image_bytes) fonksiyonunu test eder.
+
+    Bu fonksiyon, görsel verisini (bytes) base64 string'e dönüştürür.
+    Dönüştürülen string, LLM'e multimodal mesaj içinde data URI olarak gönderilir.
+    Disk'e yazılmaz; bellek içinde çalışır.
+
+    Test edilen senaryolar:
+    - Döndürülen base64 string'in orijinal bytes'a decode edilebilmesi
+    - Boş bytes için geçerli base64 döndürülmesi
+    - Dönen değerin bytes değil string tipinde olması
+    - Büyük görsel verisinin doğru encode edilmesi
+    """
 
     def test_returns_valid_base64_string(self):
         from agents.visualcontrolagent import encode_image
@@ -30,6 +43,22 @@ class TestEncodeImage:
 
 
 class TestVisualAuditor:
+    """
+    visual_auditor(state) LangGraph node fonksiyonunu test eder.
+
+    Bu fonksiyon, kampanya görselini onaylanan metinle karşılaştırarak denetler.
+    Görsel, state'teki image_bytes ve image_mime alanlarından alınır; disk'e
+    yazılmadan doğrudan base64'e çevrilerek LLM'e multimodal mesaj olarak gönderilir.
+
+    Test edilen senaryolar:
+    - Görsel denetim raporunun state'e kaydedilmesi
+    - "Hata bulunamadı" gibi güvenli ifade içeren yanıtta is_visual_safe:True
+    - "Tutarsızlık" gibi problem ifadesi içeren yanıtta is_visual_safe:False
+    - selected_model belirtilmediğinde varsayılan modelin (gpt-4o) kullanılması
+    - LLM'e gönderilen mesajın image_url tipinde bir parça içermesi
+    - MIME tipinin data URI'ye doğru eklenmesi
+    - Görsel bytes'ının base64 olarak data URI içinde iletilmesi
+    """
 
     def _make_state(self, image_bytes=b"fake-png", mime="image/png",
                     campaign_text="Masrafsız kredi.", model="gpt-4o"):
@@ -148,6 +177,16 @@ class TestVisualAuditor:
 
 
 class TestVisualAgentStateSchema:
+    """
+    VisualControlAgent AgentState TypedDict şemasını test eder.
+
+    image_path kaldırılıp image_bytes + image_mime'a geçildiğinden bu testler
+    şemanın güncel kalmasını ve eski alanın yanlışlıkla geri eklenmemesini sağlar.
+
+    Test edilen senaryolar:
+    - AgentState'in image_bytes ve image_mime alanlarını içermesi
+    - Eski image_path alanının artık şemada bulunmaması
+    """
 
     def test_agent_state_has_required_keys(self):
         from agents.visualcontrolagent import AgentState

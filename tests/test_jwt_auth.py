@@ -4,6 +4,23 @@ from unittest.mock import patch
 
 
 class TestCreateJwt:
+    """
+    create_jwt(username, display_name, role) fonksiyonunu test eder.
+
+    Bu fonksiyon, kullanıcı girişinde imzalı JWT token ve benzersiz token_id
+    üretir. Token; kullanıcı adı (sub), görünen ad, rol ve token_id (tid) içerir.
+    token_id ayrıca MongoDB'ye kaydedilir; böylece tek aktif oturum garantilenir.
+
+    Test edilen senaryolar:
+    - Dönen değerin (token_str, token_id) tuple'ı olması
+    - Her çağrıda benzersiz token_id üretilmesi
+    - Rol belirtilmediğinde varsayılan "user" rolünün kullanılması
+    - "admin" rolünün token'a doğru kaydedilmesi
+    - Kullanıcı adının "sub" alanında saklanması
+    - Görünen adın "display_name" alanında saklanması
+    - token_id'nin "tid" alanında saklanması
+    - JWT_SECRET tanımlanmamışsa RuntimeError fırlatılması
+    """
 
     def test_returns_tuple_of_token_and_id(self):
         with patch.dict("os.environ", {"JWT_SECRET": "test-secret"}):
@@ -64,6 +81,20 @@ class TestCreateJwt:
 
 
 class TestVerifyJwt:
+    """
+    verify_jwt(token) fonksiyonunu test eder.
+
+    Bu fonksiyon, cookie'den gelen JWT token'ın imzasını ve süresini doğrular.
+    Geçerliyse payload dict'i döndürür, değilse None döndürür.
+    None döndüğünde uygulama oturumu sonlandırır.
+
+    Test edilen senaryolar:
+    - Geçerli token için payload döndürülmesi
+    - Bozuk/rastgele string için None döndürülmesi
+    - Son karakterleri değiştirilerek tahrif edilmiş token için None döndürülmesi
+    - Farklı secret ile imzalanmış token için None döndürülmesi
+    - Boş string için None döndürülmesi
+    """
 
     def test_valid_token_returns_payload(self):
         with patch.dict("os.environ", {"JWT_SECRET": "test-secret"}):
