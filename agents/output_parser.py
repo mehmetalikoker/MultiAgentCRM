@@ -71,29 +71,32 @@ _VISUAL_PROBLEM_TERMS = [
 ]
 
 
-def parse_visual_response(content: str) -> bool:
+def parse_visual_response(content: str) -> tuple[bool, dict | None]:
     """
-    Görsel denetim çıktısından is_visual_safe döndürür.
+    Görsel denetim çıktısından (is_visual_safe, parsed_dict) döndürür.
 
-    1. Çok kelimeli güvenli ifadeler placeholder ile değiştirilir.
-    2. Prompt bölüm etiketleri çıkarılır.
-    3. Kalan metinde problem/güvenli sinyal sayısı karşılaştırılır.
-    Eşit veya belirsizse fail-closed: False.
+    Önce JSON parse dener; başarısızsa keyword sayımına döner (fail-closed).
     """
+    cleaned = content.strip()
+    fence = _JSON_FENCE_RE.search(cleaned)
+    if fence:
+        cleaned = fence.group(1).strip()
+
+    try:
+        data = json.loads(cleaned)
+        is_safe = bool(data.get("is_visual_safe", False))
+        return is_safe, data
+    except (json.JSONDecodeError, ValueError, AttributeError):
+        pass
+
+    # Keyword fallback
     lower = content.lower()
-
-    # Güvenli bileşik ifadeleri önce al, içlerindeki problem sözcükleri etkisiz kılsın
     for phrase in _VISUAL_SAFE_PHRASES:
         lower = lower.replace(phrase, " __safe__ ")
-
-    # Bölüm etiketlerini kaldır ("Tutarsızlıklar:" etiketi sorun değildir)
     lower = _VISUAL_SECTION_LABEL_RE.sub(" __label__ ", lower)
-
-    safe_hits = lower.count("__safe__")
-    safe_hits += sum(1 for word in _VISUAL_SAFE_WORDS if word in lower)
-    problem_hits = sum(1 for term in _VISUAL_PROBLEM_TERMS if term in lower)
-
-    return safe_hits > problem_hits
+    safe_hits = lower.count("__safe__") + sum(1 for w in _VISUAL_SAFE_WORDS if w in lower)
+    problem_hits = sum(1 for t in _VISUAL_PROBLEM_TERMS if t in lower)
+    return safe_hits > problem_hits, None
 
 
 # ── Hukuk & Strateji ─────────────────────────────────────────────────────────

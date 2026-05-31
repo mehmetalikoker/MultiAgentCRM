@@ -20,6 +20,7 @@ class AgentState(TypedDict):
     selected_model: str
     compliance_report: str
     visual_report: str
+    visual_parsed: dict | None
     is_safe: bool
     is_visual_safe: bool
     suggestions: List[str]
@@ -53,10 +54,12 @@ def visual_auditor(state: AgentState):
     ]
 
     response = llm.invoke(messages)
+    is_safe, parsed = parse_visual_response(response.content)
 
     return {
         "visual_report": response.content,
-        "is_visual_safe": parse_visual_response(response.content),
+        "visual_parsed": parsed,
+        "is_visual_safe": is_safe,
     }
 
 # --- 3. LANGGRAPH AKIŞI ---
