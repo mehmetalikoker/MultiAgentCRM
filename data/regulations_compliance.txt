@@ -1,4 +1,83 @@
-Bankacılık kampanyalarında 'Bedava' kelimesi kullanılamaz, 'Masrafsız' veya 'Ücretsiz' denmelidir.
-Faiz oranları belirtilirken yıllık maliyet oranı mutlaka parantez içinde verilmelidir.
-Kredi kampanyalarında 'Kesin onay' veya 'Anında hesapta' gibi yanıltıcı ifadeler yasaktır.
-Kampanya bitiş tarihi ve katılım koşulları metinde açıkça belirtilmelidir.
+== GENEL YASAKLI İFADELER ==
+Kampanya metinlerinde "bedava" kelimesi kullanılamaz; yerine "masrafsız" veya "ücretsiz" ifadesi kullanılmalıdır.
+"Kesin onay", "garantili onay", "100% onay" gibi ifadeler yasaktır; bunlar yerine "ön başvuruya göre değerlendirme yapılır" kullanılmalıdır.
+"Anında hesapta", "hemen hesabınızda" gibi ifadeler yasaktır; işlem süresi açıkça belirtilmelidir.
+"Risk yok", "kayıp yaşamazsınız", "güvenceli kazanç" ifadeleri finansal ürünlerde kesinlikle kullanılamaz.
+"En düşük faiz", "piyasanın en iyi koşulları", "rakipsiz faiz oranı" gibi kıyaslama ifadeleri kanıtlanabilir veri olmadan kullanılamaz.
+"Tüm müşterilerimize geçerlidir" ifadesi ancak gerçekten tüm müşterileri kapsıyorsa kullanılabilir; hedef kitle kısıtı varsa belirtilmelidir.
+"Sınırsız" ifadesi limit olan ürünlerde kullanılamaz; fiili limit açıkça yazılmalıdır.
+"%0 faiz" ifadesi tek başına kullanılamaz; dosya masrafı, sigorta veya diğer yasal masraflar ayrıca belirtilmelidir.
+"Hemen başvur, hemen al" tarzı ifadelerde işlem süresi ve koşullar mutlaka belirtilmelidir.
+"Garantili getiri", "sabit kazanç garantisi" ifadeleri yatırım ve mevduat ürünlerinde yasaktır.
+"Özel seçildiniz", "sadece size özel" ifadeleri ancak gerçekten kişiselleştirilmiş kampanyalarda kullanılabilir.
+Abartılı veya yanıltıcı görseller ile desteklenen metinler, kampanya uyum kriterlerini karşılamaz.
+
+== BDDK REFERANSLI ZORUNLU BEYANLAR ==
+BDDK düzenlemeleri gereği kredi kampanyalarında Yıllık Maliyet Oranı (YMO) mutlaka parantez içinde ve okunaklı biçimde belirtilmelidir.
+Tüketici kredilerinde efektif yıllık faiz oranı kampanya metninde açıklanmak zorundadır (BDDK Tüketici Kredileri Yönetmeliği).
+Kampanya bitiş tarihi ve son başvuru tarihi metinde açıkça yer almalıdır; "süre sınırlıdır" gibi belirsiz ifadeler yeterli değildir.
+Kampanya katılım koşulları (minimum gelir, kredi skoru şartı, ürün sahipliği vb.) açıkça belirtilmelidir.
+Kredi kampanyalarında toplam geri ödeme tutarı veya aylık taksit örneği ile birlikte vade sayısı belirtilmelidir.
+Faiz oranı verildiğinde mutlaka "aylık" ya da "yıllık" ayrımı yapılmalı; aylık oran yıllık gibi gösterilemez.
+BDDK denetimine tabi ürünleri tanıtan kampanyalarda "BDDK lisanslı" ibaresi kullanılabilir; ancak bu ibare denetim güvencesi anlamına gelmez şeklinde yorumlanamayacak biçimde konumlandırılmalıdır.
+Mevduat hesabı kampanyalarında TMSF güvence limiti (750.000 TL) belirtilebilir; ancak bu tutar abartılarak pazarlama aracına dönüştürülemez.
+Banka kartı ve kredi kartı kampanyalarında gecikme faizi ve ücret bilgisi talep halinde ulaşılabilir olmalı; kampanya metninde gizlenmemelidir.
+
+== SPK VE YATIRIM ÜRÜNÜ KURALLARI ==
+Yatırım fonu, hisse senedi veya tahvil içeren kampanyalarda "Yatırım yapılan araçlar risk içermektedir; geçmiş getiri gelecek getiriyi garanti etmez." uyarısı zorunludur.
+Sermaye piyasası ürünleri için hazırlanan kampanyalar SPK lisanslı yetkililerin onayından geçmelidir.
+Yapılandırılmış ürün kampanyalarında anapara kaybı riski varsa bu açıkça belirtilmelidir.
+
+== KVKK VE VERİ GİZLİLİĞİ ==
+Kişiselleştirilmiş kampanyalarda müşterinin hangi verilerinin kullanıldığı (işlem geçmişi, coğrafi konum vb.) belirtilmeli ve açık rıza alınmış olmalıdır.
+Kampanya metninde müşteriye ait kişisel veri (isim, hesap bilgisi vb.) kullanılıyorsa KVKK kapsamında veri işleme onayı mevcut olmalıdır.
+Üçüncü taraf iş ortakları ile yapılan kampanyalarda veri paylaşımı varsa bu durum kampanya metninde açıklanmalıdır.
+
+== KANAL BAZLI KURALLAR: SMS ==
+SMS kampanyalarında mesaj sonuna STOP kodu ve vazgeçme yöntemi eklenmelidir (örn. "Vazgeçmek için STOP yazıp 4607'ye gönderin").
+SMS'te kullanılan kısaltmalar (ör. YMO, APR) açıklamasız bırakılmamalı; kısa mesaj kısıtı nedeniyle detay için link veya şube yönlendirmesi yapılmalıdır.
+SMS kampanyalarında tek bir faiz/oran öne çıkarılıyorsa "Koşullar için bankamızı arayın veya şubeye başvurun" ibaresi eklenmelidir.
+SMS metinlerinde büyük harf ile yazılmış abartılı ifadeler (ör. "BÜYÜK FIRSATI KAÇIRMA") kullanıcıyı yanıltma riski taşır; ölçülü kullanılmalıdır.
+Kişiselleştirilmiş SMS kampanyalarında müşteri adı veya hesap bilgisi yer alıyorsa ilgili KVKK onayı alınmış olmalıdır.
+SMS ile sunulan kampanya koşulları web sitesinde veya şubede erişilebilir olmalı ve bağlantı kısa mesajda verilmelidir.
+
+== KANAL BAZLI KURALLAR: E-POSTA ==
+E-posta kampanyalarında abonelikten çıkma (unsubscribe) bağlantısı zorunludur ve çalışır durumda olmalıdır.
+E-posta gönderen adı ve adresi açık olmalı; "noreply" adresleri kampanya e-postalarında tek iletişim kanalı olamaz.
+E-posta kampanyalarında kampanya koşulları, bitiş tarihi ve katılım şartları tam olarak yer almalıdır; link ile "devamını oku" yönlendirmesi yapılıyorsa bağlantı çalışır olmalıdır.
+E-posta başlığı (subject) kampanya içeriğini yanıltıcı biçimde tanımlamaları yasaktır (örn. "Hesabınızda sorun var" yazıp kampanya gönderilemez).
+HTML e-postalarda görsel ağırlıklı tasarımda metin alternatifi (alt text) bulunmalı; salt görsel kampanyalar uyum riskine yol açar.
+E-posta gönderim listesi KVKK kapsamında izin alınmış kişilerden oluşmalıdır.
+
+== KANAL BAZLI KURALLAR: MOBİL INBOUND KAMPANYA ==
+Mobil uygulama içi kampanyalarda kullanıcı tıklamadan önce kampanya koşulları özet olarak gösterilmelidir.
+Mobil kampanya bildirimlerinde kullanıcı onayı (push izni) alınmadan pazarlama bildirimi gönderilemez.
+Uygulama içi pop-up kampanyalar kullanıcı deneyimini engelleyecek biçimde zorunlu tıklama gerektirmemelidir.
+Kampanya detay sayfasına yönlendiren linkler SSL/TLS güvenli bağlantı üzerinden çalışmalıdır.
+Mobil kampanyalarda sunulan faiz oranı veya ürün koşulları, uygulama içi başvuru ekranındaki koşullarla tutarlı olmalıdır.
+
+== KANAL BAZLI KURALLAR: ŞUBE İÇİ INBOUND KAMPANYA ==
+Şube içi kampanya materyallerinde geçerlilik tarihi açıkça görünür olmalıdır; süresi dolmuş materyaller derhal kaldırılmalıdır.
+Personele yönelik iç kampanya bilgi notları hiçbir şekilde müşteriye doğrudan dağıtılmamalıdır.
+Şube içi kampanyalarda sunulan koşullar müşteriyle imzalanan sözleşmeyle birebir örtüşmelidir.
+Kampanya kapsamındaki ürün için müşteriye verilen yazılı teklif, bankacılık sistemindeki koşullarla tutarlı olmalıdır.
+Müşteriye sunulan broşür ve el ilanlarında QR kod veya web linki ile koşulların tam metnine erişim sağlanmalıdır.
+
+== KANAL BAZLI KURALLAR: PUSH BİLDİRİM ==
+Push bildirim kampanyaları yalnızca kullanıcının açık bildirim iznini verdiği durumlarda gönderilebilir.
+Push bildirim metni en fazla 100 karakter olmalı; koşullar uygulama içi sayfaya yönlendirilerek aktarılmalıdır.
+Aciliyet yaratan push ifadeler (ör. "Son 1 saat!", "Fırsat bitiyor!") gerçek bir zaman kısıtı yoksa kullanılamaz.
+Push bildirimlerde kişisel veri (bakiye, limit bilgisi) yalnızca müşteri güvenliği kapsamında gönderilmeli; pazarlama push'unda hassas finansal veri yer almamalıdır.
+Gece 22:00 ile sabah 08:00 arasında pazarlama amaçlı push bildirimi gönderilmemelidir.
+
+== YANILTICI İFADE ÖRNEKLERİ VE DOĞRU ALTERNATIFLERI ==
+YANLIŞ: "Bedava kredi" → DOĞRU: "Masrafsız kredi (YMO: %X)"
+YANLIŞ: "Kesin onay garantisi" → DOĞRU: "Ön başvuru sonucuna göre değerlendirme yapılır"
+YANLIŞ: "Anında hesabınızda" → DOĞRU: "Başvurunuz en geç X iş günü içinde sonuçlanır"
+YANLIŞ: "En düşük faizli kredi" → DOĞRU: "Aylık %X faiz oranıyla (YMO: %Y)"
+YANLIŞ: "Tüm müşterilerimize özel" → DOĞRU: "Seçili müşterilerimize özel (Koşullar için tıklayın)"
+YANLIŞ: "%0 faizli kredi" → DOĞRU: "%0 faizli kredi (Dosya masrafı ve sigorta ücretleri geçerlidir, YMO: %X)"
+YANLIŞ: "Sınırsız nakit avans" → DOĞRU: "Kredi limitinize kadar nakit avans"
+YANLIŞ: "Risk yok, garantili kazanç" → DOĞRU: "Geçmiş getiri gelecek getiriyi garanti etmez"
+YANLIŞ: "Rakipsiz faiz oranı" → DOĞRU: "Rekabetçi faiz oranı" (kıyaslama verisi olmadan kullanılamaz)
+YANLIŞ: "Hemen hesabınızda" → DOĞRU: "Onay sonrası aynı iş günü hesabınıza aktarılır"
