@@ -39,7 +39,7 @@ def visual_auditor(state: AgentState):
     base64_image = encode_image(state["image_bytes"])
     mime_type = state["image_mime"]
 
-    safe_text = sanitize_input(state["campaign_text"])
+    safe_text, _ = sanitize_input(state["campaign_text"])
     wrapped_text = wrap_user_content(safe_text)
 
     template = get_prompt("visual_control", "prompts/visual_control.txt")

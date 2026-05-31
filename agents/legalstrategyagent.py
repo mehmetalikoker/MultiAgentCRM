@@ -52,7 +52,7 @@ def legal_strategy_auditor(state: AgentState):
     llm = get_llm(state.get("selected_model", "gpt-4o"))
     documents = state.get("legal_documents") or []
 
-    safe_text = sanitize_input(state["campaign_text"])
+    safe_text, _ = sanitize_input(state["campaign_text"])
     wrapped_text = wrap_user_content(safe_text)
 
     if documents:

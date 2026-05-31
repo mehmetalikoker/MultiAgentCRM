@@ -44,6 +44,7 @@ class AgentState(TypedDict):
     compliance_report: str
     is_safe: bool
     suggestions: List[str]
+    injection_detected: bool
 
 
 def compliance_checker(state: AgentState):
@@ -51,7 +52,7 @@ def compliance_checker(state: AgentState):
 
     llm = get_llm(state.get("selected_model", "gpt-4o"))
 
-    safe_text = sanitize_input(state['campaign_text'])
+    safe_text, injection_detected = sanitize_input(state['campaign_text'])
     wrapped_text = wrap_user_content(safe_text)
 
     vectorstore = _get_vectorstore()
@@ -74,6 +75,7 @@ def compliance_checker(state: AgentState):
         "compliance_report": response.content,
         "is_safe": is_safe,
         "suggestions": suggestions,
+        "injection_detected": injection_detected,
     }
 
 

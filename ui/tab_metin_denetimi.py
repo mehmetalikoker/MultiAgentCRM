@@ -63,6 +63,12 @@ def render(selected_model: str, models: dict):
 
             st.markdown("---")
             st.subheader("Denetim Sonucu")
+
+            if result.get("injection_detected"):
+                st.warning(
+                    "⚠️ **Güvenlik Uyarısı:** Girdide prompt injection girişimi tespit edildi. "
+                    "Şüpheli içerik filtrelendi ve denetim temizlenmiş metin üzerinden yapıldı."
+                )
             st.markdown(f"**Kanal:** `{channel}` &nbsp;|&nbsp; **Model:** `{models[selected_model]}`")
 
             # ── Durum banner ─────────────────────────────────────────────────
