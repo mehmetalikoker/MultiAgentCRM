@@ -308,7 +308,7 @@ if is_admin:
     st.markdown(
         "<h1 style='color:#FF6200; font-size:2.4rem; border-bottom: 3px solid #FF6200; "
         "padding-bottom:10px; display:block;'>Agentic CRM "
-        "<span style='font-size:1.2rem; color:#888; font-weight:400;'>Yönetim Paneli</span></h1>",
+        "<span style='font-size:1.2rem; color:#888; font-weight:400;'>Kullanıcı Yönetimi</span></h1>",
         unsafe_allow_html=True
     )
 else:
@@ -324,13 +324,13 @@ if is_admin:
     from ui.tab_istatistik import render as render_istatistik
     from ui.tab_yonetim_paneli import render as render_yonetim
 
-    tabs = st.tabs(["📋 Arama Geçmişi", "📊 Arama İstatistikleri", "⚙️ Yönetim Paneli"])
+    tabs = st.tabs(["👥 Kullanıcı Yönetimi", "📋 Arama Geçmişi", "📊 Arama İstatistikleri"])
     with tabs[0]:
-        render_gecmis()
-    with tabs[1]:
-        render_istatistik()
-    with tabs[2]:
         render_yonetim()
+    with tabs[1]:
+        render_gecmis()
+    with tabs[2]:
+        render_istatistik()
 else:
     from ui.tab_metin_denetimi import render as render_metin
     from ui.tab_gorsel_denetim import render as render_gorsel

@@ -4,7 +4,7 @@ from user.db import load_users_list, add_user, delete_user, unlock_user, set_use
 
 
 def render():
-    st.header("Yönetim Paneli")
+    st.header("Kullanıcı Yönetimi")
     st.markdown("Kullanıcı hesaplarını buradan yönetebilirsiniz.")
 
     users = load_users_list()
