@@ -3,7 +3,6 @@ import sys
 sys.stdout.reconfigure(encoding='utf-8')
 
 import base64
-from pathlib import Path
 from typing import TypedDict, List
 from dotenv import load_dotenv
 from agents.llm_factory import get_llm
@@ -13,11 +12,6 @@ from langchain_core.messages import HumanMessage, SystemMessage
 from langgraph.graph import StateGraph, END
 
 load_dotenv()
-
-_PROMPT_DIR = Path(__file__).parent.parent / "prompts"
-
-def _load_prompt(name: str) -> str:
-    return (_PROMPT_DIR / name).read_text(encoding="utf-8")
 
 class AgentState(TypedDict):
     campaign_text: str
@@ -38,6 +32,8 @@ def encode_image(image_bytes: bytes) -> str:
 
 # --- 2. VISUAL AUDITOR AGENT LOGIC ---
 def visual_auditor(state: AgentState):
+    from user.prompt_store import get_prompt
+
     llm = get_llm(state.get("selected_model", "gpt-4o"))
     base64_image = encode_image(state["image_bytes"])
     mime_type = state["image_mime"]
@@ -45,7 +41,7 @@ def visual_auditor(state: AgentState):
     safe_text = sanitize_input(state["campaign_text"])
     wrapped_text = wrap_user_content(safe_text)
 
-    template = _load_prompt("visual_control.txt")
+    template = get_prompt("visual_control", "prompts/visual_control.txt")
     prompt = template.format(campaign_text=wrapped_text)
 
     messages = [

@@ -323,14 +323,17 @@ if is_admin:
     from ui.tab_gecmis import render as render_gecmis
     from ui.tab_istatistik import render as render_istatistik
     from ui.tab_yonetim_paneli import render as render_yonetim
+    from ui.tab_prompt_yonetimi import render as render_prompt
 
-    tabs = st.tabs(["👥 Kullanıcı Yönetimi", "📋 Arama Geçmişi", "📊 Arama İstatistikleri"])
+    tabs = st.tabs(["👥 Kullanıcı Yönetimi", "📋 Arama Geçmişi", "📊 Arama İstatistikleri", "📝 Mevzuat & Promptlar"])
     with tabs[0]:
         render_yonetim()
     with tabs[1]:
         render_gecmis()
     with tabs[2]:
         render_istatistik()
+    with tabs[3]:
+        render_prompt()
 else:
     from ui.tab_metin_denetimi import render as render_metin
     from ui.tab_gorsel_denetim import render as render_gorsel

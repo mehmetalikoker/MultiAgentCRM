@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import sys
+import hashlib
 sys.stdout.reconfigure(encoding='utf-8')
 
 from pathlib import Path
@@ -14,18 +15,24 @@ from langgraph.graph import StateGraph, END
 
 load_dotenv()
 
-_PROMPT_DIR = Path(__file__).parent.parent / "prompts"
-_DATA_DIR = Path(__file__).parent.parent / "data"
+# Versiyon önbelleği — mevzuat değiştiğinde otomatik yeniden oluşturulur
+_fallback_vs_cache: dict = {"hash": None, "store": None}
 
-def _load_prompt(name: str) -> str:
-    return (_PROMPT_DIR / name).read_text(encoding="utf-8")
 
-def _load_regulations(name: str) -> list[str]:
-    lines = (_DATA_DIR / name).read_text(encoding="utf-8").splitlines()
-    return [l.strip() for l in lines if l.strip()]
+def _get_fallback_vectorstore() -> Chroma:
+    from user.prompt_store import get_prompt
+    content = get_prompt("regulations_legal", "data/regulations_legal.txt")
+    texts = [l.strip() for l in content.splitlines() if l.strip()]
+    h = hashlib.md5(content.encode()).hexdigest()
+    if _fallback_vs_cache["hash"] != h:
+        _fallback_vs_cache["store"] = Chroma.from_texts(
+            texts=texts,
+            embedding=OpenAIEmbeddings(),
+            collection_name="fallback_legal",
+        )
+        _fallback_vs_cache["hash"] = h
+    return _fallback_vs_cache["store"]
 
-# Fallback: kullanıcı belge yüklemezse kullanılacak varsayılan mevzuat
-_fallback_regulations = _load_regulations("regulations_legal.txt")
 
 class AgentState(TypedDict):
     campaign_text: str
@@ -34,9 +41,13 @@ class AgentState(TypedDict):
     legal_audit_report: str
     final_score: int
 
+
 workflow = StateGraph(AgentState)
 
+
 def legal_strategy_auditor(state: AgentState):
+    from user.prompt_store import get_prompt
+
     llm = get_llm(state.get("selected_model", "gpt-4o"))
     documents = state.get("legal_documents") or []
 
@@ -50,16 +61,12 @@ def legal_strategy_auditor(state: AgentState):
             collection_name="dynamic_legal",
         )
     else:
-        vs = Chroma.from_texts(
-            texts=_fallback_regulations,
-            embedding=OpenAIEmbeddings(),
-            collection_name="fallback_legal",
-        )
+        vs = _get_fallback_vectorstore()
 
     hits = vs.similarity_search(safe_text, k=5)
     legal_context = "\n\n".join([d.page_content for d in hits])
 
-    template = _load_prompt("legal_strategy.txt")
+    template = get_prompt("legal_strategy", "prompts/legal_strategy.txt")
     prompt = template.format(legal_context=legal_context, campaign_text=wrapped_text)
 
     response = llm.invoke(prompt)

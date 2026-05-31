@@ -65,8 +65,6 @@ def wrap_user_content(text: str) -> str:
     return f"<user_input>\n{text}\n</user_input>"
 
 
-ANTI_INJECTION_INSTRUCTION = (_PROMPT_DIR / "security_system.txt").read_text(encoding="utf-8")
-
-
 def build_safe_system_message() -> str:
-    return ANTI_INJECTION_INSTRUCTION.strip()
+    from user.prompt_store import get_prompt
+    return get_prompt("security_system", "prompts/security_system.txt").strip()
