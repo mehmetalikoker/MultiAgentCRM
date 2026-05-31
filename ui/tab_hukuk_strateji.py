@@ -218,4 +218,5 @@ def render(selected_model: str):
             )
 
         except Exception as e:
-            st.error(f"Hata oluştu: {e}")
+            from ui.error_handler import handle_error
+            handle_error(e, "hukuk_strateji")
