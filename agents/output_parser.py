@@ -96,26 +96,44 @@ def parse_visual_response(content: str) -> bool:
     return safe_hits > problem_hits
 
 
-# ── Hukuk & Strateji (puan içeren metin beklenen) ────────────────────────────
+# ── Hukuk & Strateji ─────────────────────────────────────────────────────────
 
 _SCORE_PATTERNS = [
+    re.compile(r"uygunluk_puani[\"']?\s*:\s*(\d{1,3})", re.IGNORECASE),
     re.compile(r"final\s+uygunluk\s+puan[ıi]\s*[:\-]?\s*(\d{1,3})", re.IGNORECASE),
     re.compile(r"uygunluk\s+puan[ıi]\s*[:\-]?\s*(\d{1,3})", re.IGNORECASE),
     re.compile(r"puan\s*[:\-]?\s*(\d{1,3})", re.IGNORECASE),
     re.compile(r"score\s*[:\-]?\s*(\d{1,3})", re.IGNORECASE),
 ]
 
-_DEFAULT_SCORE = 50  # belirsizlikte nötr, iyimser 85 değil
+_DEFAULT_SCORE = 50
 
 
-def parse_legal_score(content: str) -> int:
+def parse_legal_response(content: str) -> tuple[dict | None, int]:
     """
-    Hukuk denetim çıktısından 0-100 uygunluk puanı döndürür.
-    Hiçbir kalıp eşleşmezse nötr varsayılan (50) döner.
+    Hukuk denetim çıktısından (parsed_dict, score) döndürür.
+    JSON parse başarısızsa dict=None, score regex ile bulunur.
     """
+    cleaned = content.strip()
+    fence = _JSON_FENCE_RE.search(cleaned)
+    if fence:
+        cleaned = fence.group(1).strip()
+    try:
+        data = json.loads(cleaned)
+        score = int(data.get("uygunluk_puani", _DEFAULT_SCORE))
+        score = min(100, max(0, score))
+        return data, score
+    except (json.JSONDecodeError, ValueError, AttributeError):
+        pass
+
     for pattern in _SCORE_PATTERNS:
         match = pattern.search(content)
         if match:
-            score = int(match.group(1))
-            return min(100, max(0, score))
-    return _DEFAULT_SCORE
+            return None, min(100, max(0, int(match.group(1))))
+    return None, _DEFAULT_SCORE
+
+
+def parse_legal_score(content: str) -> int:
+    """Geriye dönük uyumluluk için — yalnızca skoru döndürür."""
+    _, score = parse_legal_response(content)
+    return score

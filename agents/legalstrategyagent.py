@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 from langchain_openai import OpenAIEmbeddings
 from agents.llm_factory import get_llm
 from agents.security import sanitize_input, wrap_user_content
-from agents.output_parser import parse_legal_score
+from agents.output_parser import parse_legal_response
 from langchain_community.vectorstores import Chroma
 from langgraph.graph import StateGraph, END
 
@@ -39,6 +39,7 @@ class AgentState(TypedDict):
     selected_model: str
     legal_documents: List[str]
     legal_audit_report: str
+    legal_parsed: dict | None
     final_score: int
 
 
@@ -71,7 +72,12 @@ def legal_strategy_auditor(state: AgentState):
 
     response = llm.invoke(prompt)
     content = response.content
-    return {"legal_audit_report": content, "final_score": parse_legal_score(content)}
+    parsed, score = parse_legal_response(content)
+    return {
+        "legal_audit_report": content,
+        "legal_parsed": parsed,
+        "final_score": score,
+    }
 
 
 workflow.add_node("legal_audit", legal_strategy_auditor)

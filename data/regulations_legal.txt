@@ -1,4 +1,42 @@
-BDDK yönetmeliğine göre faiz oranı kampanya görselinde en az 10 punto büyüklüğünde belirtilmelidir.
-Tüketiciyi Koruma Kanunu: Kampanya bitiş tarihi açıkça belirtilmek zorundadır.
-Yanıltıcı reklam içeren kampanyalar BDDK tarafından 100.000 TL'ye kadar cezalandırılabilir.
-Zorunlu açıklamalar (masraf, komisyon, vb.) kampanya metninde yer almalıdır.
+== TÜKETİCİNİN KORUNMASI HAKKINDA KANUN (6502) ==
+6502 sayılı TKHK Madde 61: Finansal hizmetlere ilişkin sözleşmeler yazılı olarak kurulur ve tüketiciye bir nüshası verilir; bu yükümlülük kampanya materyallerinde koşullara ulaşılabilirlik zorunluluğunu doğurur.
+6502 sayılı TKHK Madde 63: Tüketici kredisi tekliflerinde kredi tutarı, faiz oranı, toplam geri ödeme tutarı ve taksit planı açıkça belirtilmek zorundadır.
+6502 sayılı TKHK Madde 64: Tüketici kredilerinde faiz oranının değiştirilmesi ancak sözleşmede belirtilen koşullar dahilinde ve tüketiciye önceden bildirim yapılarak gerçekleştirilebilir; kampanya metninde oran garantisi verilmesi yanıltıcı sayılır.
+6502 sayılı TKHK Madde 85: Haksız ticari uygulamalar yasaktır; tüketiciyi yanıltacak, aldatacak veya baskı altına alacak ticari uygulama haksız ticari uygulama sayılır.
+6502 sayılı TKHK Haksız Şartlar Yönetmeliği: Kampanya koşullarında tüketici aleyhine haksız şart oluşturan maddeler geçersizdir; belirsiz veya gizli koşullar haksız şart kapsamında değerlendirilebilir.
+6502 sayılı TKHK Madde 73/A: Finansal tüketici şikayetleri önce bankaya, ardından Finansal Tüketici Hakları Derneği'ne taşınabilir; yanıltıcı kampanya nedeniyle başlatılan şikayetler yaptırım gerektirebilir.
+
+== BANKACILIK KANUNU (5411) ==
+5411 sayılı Bankacılık Kanunu Madde 76: Bankalar, müşterilere sunulan ürün ve hizmetlere ilişkin her türlü bilgiyi açık, anlaşılır ve yanıltıcı olmayan biçimde vermek zorundadır.
+5411 sayılı Bankacılık Kanunu Madde 77: Bankalar müşterilerin finansal okuryazarlığını artırmak amacıyla bilgilendirme yapmakla yükümlüdür; yanıltıcı kampanya bu yükümlülükle çelişir.
+5411 sayılı Bankacılık Kanunu Madde 148-149: Yanıltıcı reklam ve kampanya materyalleri nedeniyle bankalar hakkında BDDK tarafından idari para cezası ve işlem yasağı uygulanabilir.
+
+== BDDK YÖNETMELİKLERİ ==
+BDDK Tüketici Kredileri Yönetmeliği: Tüketici kredisi tekliflerinde Yıllık Maliyet Oranı (YMO) ve toplam geri ödeme tutarı zorunlu olarak belirtilmek zorundadır.
+BDDK Tüketici Kredileri Yönetmeliği: Kredi kampanyalarında kullanılan faiz oranının aylık mı yıllık mı olduğu açıkça belirtilmelidir; aylık oran yıllık gibi gösterilemez.
+BDDK Konut Finansmanı Yönetmeliği: Konut kredisi kampanyalarında sabit ve değişken faiz seçenekleri, erken ödeme koşulları ve sigorta zorunlulukları belirtilmelidir.
+BDDK Finansal Tüketici Şikayetleri Yönetmeliği: Yanıltıcı kampanya materyalleri nedeniyle oluşan şikayetler bankanın uyum kaydına işlenir ve denetim sürecini tetikleyebilir.
+BDDK Yönetmeliği: Kampanya görsellerinde faiz oranı en az 10 punto büyüklüğünde, okunaklı biçimde gösterilmelidir.
+BDDK Uzaktan Kimlik Tespiti Yönetmeliği: Dijital kanallarda açılan hesap veya kredi başvurularını kapsayan kampanyalarda kimlik doğrulama sürecine atıfta bulunulmalıdır.
+
+== SERMAYE PİYASASI KANUNU VE SPK DÜZENLEMELERİ ==
+6362 sayılı Sermaye Piyasası Kanunu: Yatırım ürünlerine ilişkin pazarlama materyalleri SPK tarafından belirlenen açıklama standartlarına uygun olmak zorundadır.
+SPK Yatırım Hizmetleri Tebliği: Yatırım araçlarına yönelik kampanyalarda geçmiş performansın gelecek getiriyi garanti etmediği uyarısı zorunludur.
+SPK Yatırım Fonu Tebliği: Fon getirisi ve risk bilgisi içeren kampanyalarda standardize edilmiş risk göstergesi (SRG) kullanılması zorunludur.
+
+== KİŞİSEL VERİLERİN KORUNMASI KANUNU (6698) ==
+6698 sayılı KVKK Madde 5: Kişisel verilerin işlenmesi açık rıza gerektirmekte olup pazarlama amaçlı iletişimde veri sahibinin onayı zorunludur.
+6698 sayılı KVKK Madde 11: Veri sahipleri pazarlama iletişimini istedikleri zaman durdurma hakkına sahiptir; bu hakkın kolayca kullanılabilir olması zorunludur.
+6698 sayılı KVKK Madde 12: Kişisel verilerin güvenliğini sağlamak amacıyla bankalar gerekli teknik ve idari tedbirleri almak zorundadır; kampanya süreçlerinde veri güvenliği sağlanmalıdır.
+
+== TİCARİ ELEKTRONİK İLETİ VE REKLAM MEVZUATI ==
+Ticari İletişim ve Ticari Elektronik İletiler Hakkında Yönetmelik: SMS, e-posta ve push bildirim göndermek için alıcının önceden onayı alınmalıdır; onaysız ticari ileti idari para cezası gerektirir.
+BTK Mevzuatı: SMS pazarlama mesajlarında gönderici kimliği açık olmalı, vazgeçme yöntemi belirtilmeli ve gece 22:00-08:00 arası pazarlama mesajı gönderilemez.
+Ticari Reklam ve Haksız Ticari Uygulamalar Yönetmeliği (2022): Finansal hizmet reklamlarında abartılı ifadeler, gerçeğe aykırı karşılaştırmalı iddialar ve yanıltıcı fiyatlandırma gösterimleri yasaktır.
+Ticari Reklam Yönetmeliği: Karşılaştırmalı reklamlarda kıyaslama yapılan ürün ve kuruluş açıkça belirtilmeli, kıyaslama doğru, dürüst ve güncel veriye dayanmalıdır.
+Reklam Kurulu Kararları: "Sınırsız", "bedava", "kesin onay" gibi yanıltıcı ifadeler kullanan finansal reklamlar durdurma ve düzeltme kararıyla karşılaşmıştır.
+
+== TÜRKİYE BANKALAR BİRLİĞİ (TBB) ETİK İLKELERİ ==
+TBB Bankacılık Etik İlkeleri: Müşterilere sunulan kampanyalar açık, anlaşılır, karşılaştırılabilir ve dürüst bilgi içermeli; müşteri aleyhine tek taraflı koşul değişikliği yapılamaz.
+TBB Bireysel Müşteri Hakları: Yanıltıcı kampanya nedeniyle oluşan müşteri mağduriyetleri bankanın itibar riski kapsamında değerlendirilir ve TBB bünyesinde şikayet mekanizmasını harekete geçirebilir.
+TBB Sürdürülebilir Bankacılık İlkeleri: Kampanya metinleri müşterinin bilinçli karar almasını desteklemeli; aşırı borçlanmaya teşvik edici içeriklerden kaçınılmalıdır.
