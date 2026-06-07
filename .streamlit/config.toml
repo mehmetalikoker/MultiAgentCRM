@@ -1,0 +1,23 @@
+[server]
+headless = true
+address = "0.0.0.0"
+port = 8501
+fileWatcherType = "none"
+enableWebsocketCompression = true
+enableStaticServing = false
+maxUploadSize = 50
+maxMessageSize = 200
+
+[runner]
+fastReruns = true
+magicEnabled = false
+
+[browser]
+gatherUsageStats = false
+
+[client]
+toolbarMode = "minimal"
+showErrorDetails = false
+
+[logger]
+level = "warning"

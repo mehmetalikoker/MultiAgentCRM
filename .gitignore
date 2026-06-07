@@ -6,7 +6,6 @@ __pycache__/
 *.db
 *.sqlite3
 chroma_db/
-.streamlit/
 .claude/settings.local.json
 user/login_attempts.json
 user/reset_tokens.json
