@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from pathlib import Path
 from datetime import datetime, timezone
+from functools import lru_cache
 from user.mongo import get_db
 
 _MAX_HISTORY = 10
@@ -11,6 +12,7 @@ def _col():
     return get_db()["prompts"]
 
 
+@lru_cache(maxsize=32)
 def get_prompt(key: str, fallback_path: str) -> str:
     doc = _col().find_one({"key": key}, {"_id": 0, "content": 1})
     if doc:
@@ -43,6 +45,7 @@ def save_prompt(key: str, content: str, updated_by: str) -> None:
         }},
         upsert=True,
     )
+    get_prompt.cache_clear()
 
 
 def get_prompt_meta(key: str) -> dict | None:
@@ -58,3 +61,4 @@ def rollback_prompt(key: str, version_index: int, updated_by: str) -> None:
     history = get_history(key)
     if 0 <= version_index < len(history):
         save_prompt(key, history[version_index]["content"], updated_by)
+        get_prompt.cache_clear()

@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 import os
+from functools import lru_cache
 from dotenv import load_dotenv
 
 load_dotenv()
 
+@lru_cache(maxsize=16)
 def get_llm(model: str, temperature: float = 0):
     if model.startswith("gpt-"):
         from langchain_openai import ChatOpenAI
