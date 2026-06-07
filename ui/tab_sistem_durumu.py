@@ -23,6 +23,7 @@ _API_KEYS = {
 
 # ── Yardımcı sorgular ─────────────────────────────────────────────────────────
 
+@st.cache_data(ttl=30)
 def _check_mongo() -> tuple[bool, float, str]:
     try:
         from user.mongo import get_db
@@ -33,6 +34,7 @@ def _check_mongo() -> tuple[bool, float, str]:
         return False, 0.0, str(e)
 
 
+@st.cache_data(ttl=60)
 def _collection_counts() -> dict:
     try:
         from user.mongo import get_db
@@ -48,19 +50,31 @@ def _collection_counts() -> dict:
         return {}
 
 
+@st.cache_data(ttl=60)
 def _audit_stats_24h() -> dict:
     try:
         from user.mongo import get_db
         db = get_db()
         cutoff = (datetime.now(timezone.utc) - timedelta(hours=24)).strftime("%Y-%m-%dT%H:%M:%S")
-        total  = db["audit_logs"].count_documents({"timestamp": {"$gte": cutoff}})
-        safe   = db["audit_logs"].count_documents({"timestamp": {"$gte": cutoff}, "is_safe": True})
-        unsafe = db["audit_logs"].count_documents({"timestamp": {"$gte": cutoff}, "is_safe": False})
-        return {"total": total, "safe": safe, "unsafe": unsafe}
+        pipeline = [
+            {"$match": {"timestamp": {"$gte": cutoff}}},
+            {"$group": {
+                "_id": None,
+                "total":  {"$sum": 1},
+                "safe":   {"$sum": {"$cond": [{"$eq": ["$is_safe", True]},  1, 0]}},
+                "unsafe": {"$sum": {"$cond": [{"$eq": ["$is_safe", False]}, 1, 0]}},
+            }},
+        ]
+        result = list(db["audit_logs"].aggregate(pipeline))
+        if result:
+            r = result[0]
+            return {"total": r["total"], "safe": r["safe"], "unsafe": r["unsafe"]}
+        return {"total": 0, "safe": 0, "unsafe": 0}
     except Exception:
         return {"total": 0, "safe": 0, "unsafe": 0}
 
 
+@st.cache_data(ttl=30)
 def _locked_users() -> list[dict]:
     try:
         from user.db import load_users_list
@@ -69,6 +83,7 @@ def _locked_users() -> list[dict]:
         return []
 
 
+@st.cache_data(ttl=30)
 def _pending_attempts() -> Counter:
     try:
         from user.mongo import get_db
@@ -78,6 +93,7 @@ def _pending_attempts() -> Counter:
         return Counter()
 
 
+@st.cache_data(ttl=30)
 def _active_sessions() -> int:
     try:
         from user.mongo import get_db
@@ -123,6 +139,12 @@ def render():
     with col_btn:
         st.markdown("<div style='height:14px'></div>", unsafe_allow_html=True)
         if st.button("🔄 Yenile", use_container_width=True):
+            _check_mongo.clear()
+            _collection_counts.clear()
+            _audit_stats_24h.clear()
+            _locked_users.clear()
+            _pending_attempts.clear()
+            _active_sessions.clear()
             st.rerun()
 
     # ── 1. MongoDB ────────────────────────────────────────────────────────────

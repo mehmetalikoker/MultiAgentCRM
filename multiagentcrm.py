@@ -3,6 +3,7 @@ import sys
 import os
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
+import time
 import hashlib
 import streamlit as st
 
@@ -246,13 +247,16 @@ if not st.session_state.get("authenticated"):
     _show_login()
     st.stop()
 
-# ─── AKTİF OTURUM KONTROLÜ (her render'da) ───────────────────────────────────
-_stored_tid = get_active_token(st.session_state.get("username", ""))
-if _stored_tid != st.session_state.get("token_id"):
-    _cookie.remove("crm_auth")
-    st.session_state.clear()
-    st.session_state["kicked_out"] = True
-    st.rerun()
+# ─── AKTİF OTURUM KONTROLÜ (30 sn'de bir) ───────────────────────────────────
+_now = time.time()
+if _now - st.session_state.get("_token_check_ts", 0) > 30:
+    st.session_state["_token_check_ts"] = _now
+    _stored_tid = get_active_token(st.session_state.get("username", ""))
+    if _stored_tid != st.session_state.get("token_id"):
+        _cookie.remove("crm_auth")
+        st.session_state.clear()
+        st.session_state["kicked_out"] = True
+        st.rerun()
 
 MODELS = {
     # Anthropic
