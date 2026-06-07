@@ -4,6 +4,8 @@ import time
 from collections import Counter
 from datetime import datetime, timezone, timedelta
 
+import pandas as pd
+import altair as alt
 import streamlit as st
 from dotenv import load_dotenv
 
@@ -102,6 +104,26 @@ def _active_sessions() -> int:
         return 0
 
 
+_ATLAS_FREE_LIMIT_MB = 512
+
+@st.cache_data(ttl=300)
+def _storage_stats() -> dict:
+    try:
+        from user.mongo import get_db
+        db = get_db()
+        rows = []
+        total_mb = 0.0
+        for name in db.list_collection_names():
+            s = db.command("collStats", name, scale=1024)
+            size_mb = s["storageSize"] / 1024
+            total_mb += size_mb
+            rows.append({"Koleksiyon": name, "Boyut (MB)": round(size_mb, 4)})
+        pct = round(total_mb / _ATLAS_FREE_LIMIT_MB * 100, 3)
+        return {"rows": rows, "total_mb": round(total_mb, 4), "pct": pct}
+    except Exception:
+        return {"rows": [], "total_mb": 0.0, "pct": 0.0}
+
+
 # ── Bileşen yardımcıları ──────────────────────────────────────────────────────
 
 def _key_card(label: str, env_key: str) -> None:
@@ -145,6 +167,7 @@ def render():
             _locked_users.clear()
             _pending_attempts.clear()
             _active_sessions.clear()
+            _storage_stats.clear()
             st.rerun()
 
     # ── 1. MongoDB ────────────────────────────────────────────────────────────
@@ -169,6 +192,40 @@ def render():
         for col, (name, cnt) in zip(c_cols, counts.items()):
             with col:
                 _metric_card(name, str(cnt))
+
+        # ── Depolama Alanı ────────────────────────────────────────────────────
+        st.markdown("<div style='height:12px'></div>", unsafe_allow_html=True)
+        storage = _storage_stats()
+        pct      = storage["pct"]
+        total_mb = storage["total_mb"]
+        bar_color = "#2ecc71" if pct < 50 else "#e67e22" if pct < 80 else "#e74c3c"
+        txt_color = "#2ecc71" if pct < 50 else "#e67e22" if pct < 80 else "#e74c3c"
+
+        col_prog, col_detail = st.columns([3, 1])
+        with col_prog:
+            st.markdown("**Depolama Alanı (Atlas Free Tier — 512 MB)**")
+            st.progress(min(pct / 100, 1.0))
+        with col_detail:
+            st.markdown(
+                f"<div style='padding-top:28px;font-size:1.05rem;font-weight:700;color:{txt_color};'>"
+                f"{total_mb:.3f} MB / 512 MB &nbsp;(%{pct:.2f})"
+                f"</div>",
+                unsafe_allow_html=True,
+            )
+
+        if storage["rows"]:
+            df = pd.DataFrame(storage["rows"]).sort_values("Boyut (MB)", ascending=False)
+            chart = (
+                alt.Chart(df)
+                .mark_bar(color=bar_color)
+                .encode(
+                    x=alt.X("Boyut (MB):Q", title="MB"),
+                    y=alt.Y("Koleksiyon:N", sort="-x", title=""),
+                    tooltip=["Koleksiyon", "Boyut (MB)"],
+                )
+                .properties(height=40 + len(storage["rows"]) * 32)
+            )
+            st.altair_chart(chart, use_container_width=True)
 
     st.markdown("---")
 
