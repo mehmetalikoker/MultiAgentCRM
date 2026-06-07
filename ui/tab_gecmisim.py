@@ -3,6 +3,18 @@ import streamlit as st
 import pandas as pd
 from datetime import datetime, timezone, timedelta
 
+
+@st.cache_data(ttl=60)
+def _load_my_logs(username: str, days: int = 7) -> list:
+    from user.mongo import get_db
+    cutoff = (datetime.now(timezone.utc) - timedelta(days=days)).strftime("%Y-%m-%dT%H:%M:%S")
+    return list(
+        get_db()["audit_logs"]
+        .find({"username": username, "timestamp": {"$gte": cutoff}}, {"_id": 0})
+        .sort("timestamp", -1)
+    )
+
+
 _AGENT_LABELS = {
     "compliance": "Metin Denetimi",
     "visual":     "Görsel Denetim",
@@ -30,8 +42,6 @@ def _summary_cards(entries: list):
 
 
 def render():
-    from agents.audit_logger import load_user_audit_log
-
     st.header("Denetim Geçmişim")
 
     username = st.session_state.get("username", "")
@@ -39,7 +49,7 @@ def render():
     today_str   = datetime.now(timezone.utc).strftime("%d.%m.%Y")
     st.caption(f"Son 7 gün — {cutoff_date} ile {today_str} arası denetimleriniz")
 
-    entries = load_user_audit_log(username, days=7)
+    entries = _load_my_logs(username, days=7)
 
     if not entries:
         st.info("Son 7 günde hiç denetim kaydınız yok.")
