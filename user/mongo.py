@@ -25,4 +25,5 @@ def get_db():
     # TTL index'leri bağlantı kurulduğunda bir kez oluştur
     db["login_attempts"].create_index("created_at", expireAfterSeconds=300)
     db["reset_tokens"].create_index("created_at", expireAfterSeconds=1800)
+    db["audit_logs"].create_index([("timestamp", -1)])
     return db
