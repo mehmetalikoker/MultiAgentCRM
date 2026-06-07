@@ -2,7 +2,6 @@
 import streamlit as st
 import pandas as pd
 from datetime import datetime, timezone, timedelta
-from agents.audit_logger import load_user_audit_log
 
 _AGENT_LABELS = {
     "compliance": "Metin Denetimi",
@@ -31,6 +30,8 @@ def _summary_cards(entries: list):
 
 
 def render():
+    from agents.audit_logger import load_user_audit_log
+
     st.header("Denetim Geçmişim")
 
     username = st.session_state.get("username", "")
