@@ -282,6 +282,54 @@ MODELS = {
 # Görsel denetimi desteklemeyen modeller
 _NON_VISION_MODELS = {"gpt-3.5-turbo", "deepseek-chat"}
 
+
+@st.dialog("📚 Mevzuat Rehberi", width="large")
+def _mevzuat_dialog():
+    from user.prompt_store import get_prompt
+
+    def _render_content(content: str, search: str):
+        current_section = None
+        matched_any = False
+        for line in content.splitlines():
+            line = line.strip()
+            if not line:
+                continue
+            if line.startswith("==") and line.endswith("=="):
+                current_section = line.strip("= ").strip()
+                continue
+            if search and search.lower() not in line.lower():
+                continue
+            if current_section:
+                st.markdown(
+                    f"<div style='background:#FF6200;color:#fff;padding:6px 12px;"
+                    f"border-radius:6px;font-weight:700;font-size:0.82rem;"
+                    f"margin:14px 0 6px;'>{current_section}</div>",
+                    unsafe_allow_html=True,
+                )
+                current_section = None
+            st.markdown(
+                f"<div style='background:#f8f9fb;border-left:3px solid #ddd;"
+                f"padding:8px 12px;border-radius:0 6px 6px 0;margin-bottom:4px;"
+                f"font-size:0.88rem;line-height:1.5;'>{line}</div>",
+                unsafe_allow_html=True,
+            )
+            matched_any = True
+        if search and not matched_any:
+            st.info("Arama sonucu bulunamadı.")
+
+    tab_uyum, tab_hukuk = st.tabs(["⚖️ Uyum Mevzuatı", "📜 Hukuki Düzenlemeler"])
+
+    with tab_uyum:
+        search_u = st.text_input("Ara...", placeholder="Madde veya anahtar kelime", key="srch_uyum")
+        content_u = get_prompt("regulations_compliance", "data/regulations_compliance.txt")
+        _render_content(content_u, search_u)
+
+    with tab_hukuk:
+        search_h = st.text_input("Ara...", placeholder="Madde veya anahtar kelime", key="srch_hukuk")
+        content_h = get_prompt("regulations_legal", "data/regulations_legal.txt")
+        _render_content(content_h, search_h)
+
+
 with st.sidebar:
     st.markdown("---")
     display_name = st.session_state.get("display_name", st.session_state.get("username", ""))
@@ -304,6 +352,12 @@ with st.sidebar:
     st.caption(f"Seçili model tüm denetim adımlarında kullanılır.")
     if selected_model in _NON_VISION_MODELS:
         st.warning("⚠️ Seçili model görsel denetimi desteklemiyor.")
+
+    st.markdown("---")
+    st.markdown("**📚 Mevzuat Rehberi**")
+    st.caption("Kampanya uyum kurallarını ve yasal düzenlemeleri inceleyin.")
+    if st.button("Mevzuatı Görüntüle", use_container_width=True):
+        _mevzuat_dialog()
 
     st.markdown("---")
 is_admin = st.session_state.get("role") == "admin"
