@@ -130,3 +130,8 @@ class TestVerifyJwt:
         with patch.dict("os.environ", {"JWT_SECRET": "test-secret"}):
             from user.jwt_auth import verify_jwt
             assert verify_jwt("") is None
+
+    def test_none_returns_none(self):
+        with patch.dict("os.environ", {"JWT_SECRET": "test-secret"}):
+            from user.jwt_auth import verify_jwt
+            assert verify_jwt(None) is None

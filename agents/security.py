@@ -31,7 +31,7 @@ _PATTERNS_DIRECT = [
 _PATTERNS_PERSONA = [
     # Rol ve persona değiştirme
     r"you\s+are\s+now\s+\w+",
-    r"act\s+as\s+(if\s+you\s+(are|were)|a|an)\s+\w+",
+    r"act\s+as\s+(if\s+you\s+|a\s+|an\s+)\w+",
     r"pretend\s+(you\s+are|to\s+be)\s+\w+",
     r"play\s+(the\s+role|a\s+character)\s+of",
     r"roleplay\s+as",

@@ -191,6 +191,115 @@ class TestLockUnlock:
         assert "locked" in call_args[1]["$unset"]
 
 
+class TestUpdatePassword:
+    """
+    update_password(username, new_password) fonksiyonunu test eder.
+
+    Kullanıcının şifresini SHA-256 hash'i olarak günceller.
+    Şifre sıfırlama akışında consume_token sonrasında çağrılır.
+
+    Test edilen senaryolar:
+    - Yeni şifrenin SHA-256 hash'inin kaydedilmesi (düz metin değil)
+    - Doğru kullanıcının güncellenmesi
+    """
+
+    def test_new_password_is_hashed(self, mock_col):
+        import hashlib
+        from user.db import update_password
+        update_password("user", "newpassword")
+        call_args = mock_col.update_one.call_args[0]
+        expected = hashlib.sha256("newpassword".encode()).hexdigest()
+        assert call_args[1]["$set"]["password_hash"] == expected
+
+    def test_correct_user_targeted(self, mock_col):
+        from user.db import update_password
+        update_password("targetuser", "pass")
+        call_args = mock_col.update_one.call_args[0]
+        assert call_args[0]["username"] == "targetuser"
+
+
+class TestGetUserByEmail:
+    """
+    get_user_by_email(email) fonksiyonunu test eder.
+
+    Şifre sıfırlama akışında e-posta adresine göre kullanıcıyı bulur.
+    Kullanıcı bulunamazsa None döndürür.
+
+    Test edilen senaryolar:
+    - Kullanıcı bulunduğunda dökümanın döndürülmesi
+    - Kullanıcı bulunamazsa None döndürülmesi
+    - E-posta adresinin küçük harfe dönüştürülerek sorgulanması
+    """
+
+    def test_returns_user_when_found(self, mock_col):
+        mock_col.find_one.return_value = {"username": "ali", "email": "ali@test.com"}
+        from user.db import get_user_by_email
+        result = get_user_by_email("ali@test.com")
+        assert result["username"] == "ali"
+
+    def test_returns_none_when_not_found(self, mock_col):
+        mock_col.find_one.return_value = None
+        from user.db import get_user_by_email
+        assert get_user_by_email("unknown@test.com") is None
+
+    def test_email_lowercased_in_query(self, mock_col):
+        mock_col.find_one.return_value = None
+        from user.db import get_user_by_email
+        get_user_by_email("ALI@TEST.COM")
+        call_args = mock_col.find_one.call_args[0][0]
+        assert call_args["email"] == "ali@test.com"
+
+
+class TestSetUserEmail:
+    """
+    set_user_email(username, email) fonksiyonunu test eder.
+
+    Yönetim panelinden kullanıcıya e-posta adresi atamak veya güncellemek için
+    kullanılır. E-posta küçük harfe dönüştürülerek saklanır.
+
+    Test edilen senaryolar:
+    - E-posta adresinin küçük harfe dönüştürülerek kaydedilmesi
+    - Doğru kullanıcının hedeflenmesi
+    """
+
+    def test_email_stored_lowercase(self, mock_col):
+        from user.db import set_user_email
+        set_user_email("user", "USER@TEST.COM")
+        call_args = mock_col.update_one.call_args[0]
+        assert call_args[1]["$set"]["email"] == "user@test.com"
+
+    def test_correct_user_targeted(self, mock_col):
+        from user.db import set_user_email
+        set_user_email("targetuser", "a@b.com")
+        call_args = mock_col.update_one.call_args[0]
+        assert call_args[0]["username"] == "targetuser"
+
+
+class TestDeleteUser:
+    """
+    delete_user(username) fonksiyonunu test eder.
+
+    Yönetim panelinden kullanıcıyı MongoDB'den siler.
+    Admin hesabının silinmesi UI katmanında engellenir; bu fonksiyon sadece
+    silme işlemini gerçekleştirir.
+
+    Test edilen senaryolar:
+    - delete_one'ın çağrılması
+    - Doğru kullanıcının hedeflenmesi
+    """
+
+    def test_delete_user_calls_delete_one(self, mock_col):
+        from user.db import delete_user
+        delete_user("ali")
+        mock_col.delete_one.assert_called_once()
+
+    def test_delete_user_targets_correct_username(self, mock_col):
+        from user.db import delete_user
+        delete_user("ali")
+        call_args = mock_col.delete_one.call_args[0][0]
+        assert call_args["username"] == "ali"
+
+
 class TestSetUserRole:
     """
     set_user_role(username, role) fonksiyonunu test eder.
