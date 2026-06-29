@@ -92,47 +92,40 @@ def build_prompt_node(state: CreatorState):
     return {"dalle_prompt": dalle_prompt, "error": None}
 
 
+def _try_generate(client, model: str, prompt: str, size: str) -> bytes:
+    """Belirtilen modelle görsel üretir; bytes döndürür."""
+    response = client.images.generate(model=model, prompt=prompt, n=1, size=size)
+    item = response.data[0]
+
+    if getattr(item, "b64_json", None):
+        return base64.b64decode(item.b64_json)
+
+    url = getattr(item, "url", None)
+    if url:
+        r = _requests.get(url, timeout=60)
+        r.raise_for_status()
+        return r.content
+
+    raise ValueError("API yanıtında ne b64_json ne url var.")
+
+
 def generate_image_node(state: CreatorState):
     dalle_prompt = state.get("dalle_prompt", "")
     if not dalle_prompt:
         return {"error": "Görsel prompt oluşturulamadı.", "generated_image_bytes": None}
 
+    from openai import OpenAI
+    client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
     try:
-        from openai import OpenAI
-        client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-
-        # gpt-image-1 is the current model in openai SDK 2.x; returns b64_json by default
-        response = client.images.generate(
-            model="gpt-image-1",
-            prompt=dalle_prompt,
-            size="1024x1024",
-            quality="standard",
-            n=1,
-        )
-        item = response.data[0]
-
-        # Prefer base64 payload; fall back to URL download
-        if getattr(item, "b64_json", None):
-            image_bytes = base64.b64decode(item.b64_json)
-            image_url = ""
-        elif getattr(item, "url", None):
-            img_response = _requests.get(item.url, timeout=60)
-            img_response.raise_for_status()
-            image_bytes = img_response.content
-            image_url = item.url
-        else:
-            return {"generated_image_bytes": None, "error": "API yanıtından görsel alınamadı."}
-
+        image_bytes = _try_generate(client, "gpt-image-1", dalle_prompt, "1024x1024")
         return {
-            "generated_image_url": image_url,
+            "generated_image_url": "",
             "generated_image_bytes": image_bytes,
             "error": None,
         }
     except Exception as e:
-        return {
-            "generated_image_bytes": None,
-            "error": str(e),
-        }
+        return {"generated_image_bytes": None, "error": str(e)}
 
 
 workflow = StateGraph(CreatorState)
