@@ -404,7 +404,7 @@ else:
     from ui.tab_gecmisim import render as render_gecmisim
     from ui.tab_kampanya_gorseli import render as render_kampanya_gorseli
 
-    main_tabs = st.tabs(["🎨 Görsel Oluşturma", "🔍 Denetim", "📊 Analiz ve Log"])
+    main_tabs = st.tabs(["🎨 Kampanya Görseli Oluşturma", "🔍 Kampanya Denetimleri", "📊 Analiz ve Log"])
 
     with main_tabs[0]:
         render_kampanya_gorseli(selected_model, MODELS, _NON_VISION_MODELS)
