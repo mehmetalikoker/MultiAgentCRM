@@ -191,7 +191,7 @@ def render(selected_model: str, models: dict, non_vision_models: set):
         example_bytes = example_image.read()
 
     # ── Adım 1: Prompt oluştur ve görsel üret ────────────────────────────────
-    progress = st.progress(0, text="DALL-E prompt oluşturuluyor...")
+    progress = st.progress(0, text="Görsel prompt oluşturuluyor...")
     try:
         from agents.campaignvisualcreatoragent import app as creator_app
 
@@ -206,7 +206,7 @@ def render(selected_model: str, models: dict, non_vision_models: set):
             "example_image_mime": example_mime,
             "selected_model": selected_model,
         })
-        progress.progress(60, text="Görsel üretiliyor...")
+        progress.progress(60, text="Görsel üretiliyor ve metin ekleniyor...")
     except Exception as e:
         progress.empty()
         from ui.error_handler import handle_error
