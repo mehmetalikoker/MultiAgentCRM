@@ -1,6 +1,6 @@
 # Agentic CRM — Kampanya Denetim Sistemi
 
-Kampanyaların metin, görsel ve hukuki uygunluğunu yapay zeka destekli çoklu ajan mimarisiyle denetleyen bir Streamlit uygulamasıdır.
+Kampanyaların metin, görsel ve hukuki uygunluğunu yapay zeka destekli çoklu ajan mimarisiyle denetleyen ve kampanya görseli oluşturan bir Streamlit uygulamasıdır.
 
 ---
 
@@ -24,15 +24,16 @@ Kampanyaların metin, görsel ve hukuki uygunluğunu yapay zeka destekli çoklu 
 
 | Modül | Açıklama |
 |---|---|
+| **Kampanya Görseli Oluşturma** | Teklif başlığı, içeriği, segmenti, tarihi, görsel içeriği ve zorunlu kriterlere göre mevzuata uygun kampanya görseli üretir; ardından otomatik görsel denetim çalıştırır |
 | **Metin Denetimi** | Kampanya metnini bankacılık mevzuatına göre denetler; uygun / düzenlenmeli / uygunsuz olarak sınıflandırır |
-| **Görsel Denetim** | Yüklenen kampanya görselini onaylı metin ile karşılaştırır; OCR, logo ve renk uyumunu kontrol eder |
-| **Hukuk & Strateji Denetimi** | Kullanıcının yüklediği PDF/TXT belgelerini veya varsayılan BDDK mevzuatını baz alarak 0–100 uygunluk puanı üretir |
+| **Görsel Denetim** | Yüklenen kampanya görselini onaylı metin ile karşılaştırır; YMO, logo ve renk uyumunu kontrol eder |
+| **Hukuk & Strateji Denetimi** | Yüklenen PDF/TXT belgelerini veya varsayılan BDDK mevzuatını baz alarak 0–100 uygunluk puanı üretir |
 | **Karşılaştırmalı Analiz** | Aynı kampanya metnini birden fazla modelle paralel olarak denetler ve sonuçları karşılaştırır |
 | **Denetim Geçmişim** | Kullanıcının son 7 güne ait denetim geçmişini filtreli olarak görüntüler |
 | **Mevzuat Rehberi** | Sidebar üzerinden uyum mevzuatı ve hukuki düzenlemelere arama yapılabilir diyalog ile erişim |
 | **Yönetim Paneli** | Yalnızca `admin` hesabında görünür; sistem durumu, kullanıcı yönetimi, prompt/mevzuat düzenleme, arama geçmişi ve istatistikleri içerir |
 | **Güvenli Giriş** | JWT cookie tabanlı oturum, SHA-256 şifre hash, rate limiting, hesap kilitleme, e-posta ile şifre sıfırlama |
-| **Güvenlik Katmanı** | Enjeksiyon tespiti ve zararlı girdi filtreleme |
+| **Güvenlik Katmanı** | Prompt injection tespiti ve zararlı girdi filtreleme |
 | **Çoklu Model Desteği** | Anthropic Claude, OpenAI ve DeepSeek modelleri arasında geçiş yapılabilir |
 
 ---
@@ -49,11 +50,13 @@ AgenticCRM/
 │   ├── campaigntextagent.py        # Metin uyum denetim ajanı (RAG + Chroma)
 │   ├── visualcontrolagent.py       # Görsel denetim ajanı (Vision LLM)
 │   ├── legalstrategyagent.py       # Hukuk & strateji denetim ajanı
+│   ├── campaignvisualcreatoragent.py # Kampanya görseli oluşturma ajanı (gpt-image-1)
 │   ├── output_parser.py            # LLM çıktı ayrıştırıcı
 │   ├── audit_logger.py             # Denetim kaydı (MongoDB)
-│   └── security.py                 # Enjeksiyon tespiti ve güvenlik katmanı
+│   └── security.py                 # Injection tespiti ve güvenlik katmanı
 │
 ├── ui/                             # Streamlit sekme UI modülleri
+│   ├── tab_kampanya_gorseli.py     # Tab: Kampanya Görseli Oluşturma
 │   ├── tab_metin_denetimi.py       # Tab: Metin Denetimi
 │   ├── tab_gorsel_denetim.py       # Tab: Görsel Denetim
 │   ├── tab_hukuk_strateji.py       # Tab: Hukuk & Strateji
@@ -77,15 +80,19 @@ AgenticCRM/
 │   ├── mailer.py                   # Şifre sıfırlama e-posta gönderimi
 │   └── prompt_store.py             # Prompt ve mevzuat içeriği yönetimi
 │
-├── state/
-│   └── agentstate.py               # Paylaşılan TypedDict durum tanımı
-│
 ├── css/
 │   └── main.css                    # ING marka teması
 │
 ├── data/                           # Varsayılan mevzuat dosyaları
 │   ├── regulations_compliance.txt
 │   └── regulations_legal.txt
+│
+├── prompts/                        # LLM prompt şablonları
+│   ├── compliance.txt
+│   ├── legal_strategy.txt
+│   ├── visual_control.txt
+│   ├── visual_creator_prompt.txt   # Kampanya görseli oluşturma prompt şablonu
+│   └── security_system.txt
 │
 ├── tests/                          # Pytest test sınıfları
 │   ├── test_llm_factory.py
@@ -143,26 +150,26 @@ pip install -r requirements.txt
 Proje kök dizininde bir `.env` dosyası oluşturun:
 
 ```env
-# Anthropic (Claude)
+# Anthropic (Claude) — denetim ve prompt oluşturma
 ANTHROPIC_API_KEY=sk-ant-...
 
-# OpenAI
+# OpenAI — denetim, embedding ve kampanya görseli üretimi (gpt-image-1)
 OPENAI_API_KEY=sk-...
 
 # DeepSeek
 DEEPSEEK_API_KEY=...
 
 # MongoDB
-MONGO_URI=mongodb+srv://...
+MONGODB_URI=mongodb+srv://...
 
 # JWT
 JWT_SECRET=gizli-anahtar-buraya
 
 # E-posta (şifre sıfırlama)
-MAIL_HOST=smtp.sirket.com
-MAIL_PORT=587
-MAIL_USER=noreply@sirket.com
-MAIL_PASS=...
+SMTP_HOST=smtp.sirket.com
+SMTP_PORT=587
+SMTP_USER=noreply@sirket.com
+SMTP_PASSWORD=...
 
 # LangSmith (opsiyonel — izleme)
 LANGCHAIN_TRACING_V2=true
@@ -203,35 +210,53 @@ pw_hash = hashlib.sha256(b"SIFRENIZ").hexdigest()
 
 ### Kullanıcı Sekmeleri
 
-#### Tab 1 — Metin Denetimi
+Normal kullanıcılar üç ana sekme altında organize edilmiş özelliklere erişir:
+
+#### 🎨 Kampanya Görseli Oluşturma
+
+Tek adımda mevzuata uygun kampanya görseli üretir ve denetler.
+
+1. **Teklif Başlığı**, **İçerik**, **Segment** ve **Bitiş Tarihi** girin
+2. **Görsel İçeriği** alanına görselde olmasını istediğiniz unsurları açıklayın
+3. **Teklif Kriteri** alanına zorunlu koşulları girin (YMO, gelir şartı vb.)
+4. İsteğe bağlı olarak stil referansı için bir **Örnek Görsel** yükleyin
+5. **Kampanya Görseli Oluştur** butonuna tıklayın
+
+Sistem iki aşamada çalışır:
+- Seçilen LLM kampanya bilgilerini alıp optimize edilmiş bir görsel prompt oluşturur
+- `gpt-image-1` modeli görseli üretir; ardından görsel denetim ajanı mevzuat uyumunu kontrol eder
+
+---
+
+#### 🔍 Kampanya Denetimleri
+
+**📝 Metin Denetimi**
 
 1. Kampanya metnini girin
 2. Dağıtım kanalını seçin (SMS, E-posta, Push Bildirimi vb.)
 3. **Denetle** butonuna tıklayın
 
-Sistem üç sonuç üretir:
-
 | Sonuç | Açıklama |
 |---|---|
-| ✅ Uygun | Mevzuata aykırı ifade ve öneri yok |
-| ⚠️ Düzenlenmesi gerekiyor | Onaylandı fakat iyileştirme önerileri mevcut |
+| ✅ Uygun | Mevzuata aykırı ifade yok |
+| ⚠️ Düzenlenmeli | Onaylandı fakat iyileştirme önerileri mevcut |
 | ❌ Uygunsuz | Mevzuat ihlali tespit edildi |
 
-#### Tab 2 — Görsel Denetim
+**🖼️ Görsel Denetim**
 
 1. Kampanya görselini yükleyin (JPG, JPEG, PNG)
-2. Daha önce onaylanmış kampanya metnini girin
+2. Daha önce onaylanmış kampanya metnini girin *(isteğe bağlı)*
 3. **Görseli Denetle** butonuna tıklayın
 
 > Görsel denetim yalnızca vision destekli modellerle çalışır. DeepSeek bu sekme için kullanılamaz.
 
-#### Tab 3 — Hukuk & Strateji Denetimi
+**⚖️ Hukuk & Strateji Denetimi**
 
 1. İsteğe bağlı olarak PDF veya TXT formatında hukuki belge(ler) yükleyin
 2. Denetlenecek kampanya metnini girin
 3. **Hukuki Denetim Yap** butonuna tıklayın
 
-Belge yüklenmezse sistem varsayılan BDDK mevzuatını kullanır. Sonuç olarak 0–100 arası bir uygunluk puanı üretilir:
+Belge yüklenmezse sistem varsayılan BDDK mevzuatını kullanır.
 
 | Puan | Renk | Yorum |
 |---|---|---|
@@ -239,11 +264,15 @@ Belge yüklenmezse sistem varsayılan BDDK mevzuatını kullanır. Sonuç olarak
 | 40–69 | Turuncu | Dikkat gerektirir |
 | 0–39 | Kırmızı | Yüksek risk |
 
-#### Tab 4 — Karşılaştırmalı Analiz
+---
+
+#### 📊 Analiz ve Log
+
+**🔀 Karşılaştırmalı Analiz**
 
 Aynı kampanya metnini birden fazla modelle aynı anda denetler; sonuçları yan yana karşılaştırmanızı sağlar.
 
-#### Tab 5 — Denetim Geçmişim
+**🕓 Denetim Geçmişim**
 
 Son 7 güne ait kişisel denetim kayıtlarını listeler; tarih ve denetim türüne göre filtrelenebilir.
 
@@ -263,15 +292,16 @@ Son 7 güne ait kişisel denetim kayıtlarını listeler; tarih ve denetim tür�
 
 ## Desteklenen Modeller
 
-| Sağlayıcı | Model | Vision |
-|---|---|---|
-| Anthropic | Claude Opus 4.7 | ✅ |
-| Anthropic | Claude Sonnet 4.6 | ✅ |
-| Anthropic | Claude Haiku 4.5 | ✅ |
-| OpenAI | GPT-4 Turbo | ✅ |
-| DeepSeek | DeepSeek Chat | ❌ |
+| Sağlayıcı | Model | Vision | Görsel Üretim |
+|---|---|---|---|
+| Anthropic | Claude Opus 4.7 | ✅ | — |
+| Anthropic | Claude Sonnet 4.6 | ✅ | — |
+| Anthropic | Claude Haiku 4.5 | ✅ | — |
+| OpenAI | GPT-4 Turbo | ✅ | — |
+| OpenAI | gpt-image-1 | — | ✅ (kampanya görseli) |
+| DeepSeek | DeepSeek Chat | ❌ | — |
 
-Sidebar'dan aktif model seçilir; seçim tüm denetim adımlarına uygulanır.
+> Sidebar'dan seçilen model metin denetimi, görsel denetim ve prompt oluşturma adımlarında kullanılır. Kampanya görseli üretimi her zaman `gpt-image-1` ile yapılır ve ayrı bir `OPENAI_API_KEY` gerektirir.
 
 ---
 
@@ -323,7 +353,7 @@ Test kapsamı:
 | `test_visualcontrolagent.py` | encode_image (MIME, base64), visual auditor |
 | `test_legalstrategyagent.py` | Score parsing/clamping, fallback/döküman seçimi |
 | `test_output_parser.py` | LLM çıktı ayrıştırma ve hata durumları |
-| `test_security.py` | Enjeksiyon tespiti, girdi doğrulama |
+| `test_security.py` | Injection tespiti, girdi doğrulama |
 | `test_audit_logger.py` | Denetim kaydı yazma ve sorgulama |
 | `test_jwt_auth.py` | Token oluşturma, doğrulama, süresi dolmuş token |
 | `test_rate_limiter.py` | Giriş denemesi sayacı, kilitleme mantığı |
@@ -339,6 +369,7 @@ Test kapsamı:
 | UI | Streamlit 1.57 |
 | Ajan Orkestrasyonu | LangGraph 1.1 |
 | LLM Entegrasyonu | LangChain (Anthropic, OpenAI, DeepSeek) |
+| Görsel Üretim | OpenAI gpt-image-1 |
 | Vektör Veritabanı | ChromaDB 1.5 |
 | Embedding | OpenAI Embeddings |
 | Veritabanı | MongoDB (Atlas veya yerel) |
