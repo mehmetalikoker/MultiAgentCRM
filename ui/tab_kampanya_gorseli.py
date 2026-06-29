@@ -237,9 +237,24 @@ def render(selected_model: str, models: dict, non_vision_models: set):
     st.markdown("---")
     st.subheader("Oluşturulan Kampanya Görseli")
 
-    col_img, col_meta = st.columns([1, 1])
-    with col_img:
+    # Görseli ortalanmış, sabit maksimum genişlikte göster (kesilme olmaz)
+    col_pad_l, col_center, col_pad_r = st.columns([1, 3, 1])
+    with col_center:
         st.image(image_bytes, caption="Yapay Zeka Tarafından Oluşturulan Görsel", use_container_width=True)
+
+    # Meta bilgi + indirme butonu — görsel altında
+    col_meta, col_dl = st.columns([3, 1])
+    with col_meta:
+        st.markdown(
+            f"<div style='background:#f8f9fb;border-radius:8px;padding:12px 16px;font-size:0.9rem;line-height:1.8;'>"
+            f"<b>Başlık:</b> {html.escape(campaign_title)} &nbsp;|&nbsp; "
+            f"<b>Segment:</b> {html.escape(campaign_segment)} &nbsp;|&nbsp; "
+            f"<b>Bitiş:</b> {campaign_date} &nbsp;|&nbsp; "
+            f"<b>Model:</b> {models.get(selected_model, selected_model)}"
+            f"</div>",
+            unsafe_allow_html=True,
+        )
+    with col_dl:
         filename = f"kampanya_{campaign_title[:30].strip().replace(' ', '_')}.png"
         st.download_button(
             "Görseli İndir (PNG)",
@@ -249,20 +264,8 @@ def render(selected_model: str, models: dict, non_vision_models: set):
             use_container_width=True,
         )
 
-    with col_meta:
-        st.markdown("**Kampanya Özeti**")
-        st.markdown(
-            f"<div style='background:#f8f9fb;border-radius:8px;padding:14px 16px;font-size:0.9rem;line-height:1.7;'>"
-            f"<b>Başlık:</b> {html.escape(campaign_title)}<br>"
-            f"<b>Segment:</b> {html.escape(campaign_segment)}<br>"
-            f"<b>Bitiş Tarihi:</b> {campaign_date}<br>"
-            f"<b>Model:</b> {models.get(selected_model, selected_model)}"
-            f"</div>",
-            unsafe_allow_html=True,
-        )
-        st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
-        with st.expander("Kullanılan DALL-E Prompt", expanded=False):
-            st.text_area("", value=dalle_prompt, height=200, disabled=True, label_visibility="collapsed")
+    with st.expander("Kullanılan Görsel Prompt", expanded=False):
+        st.text_area("", value=dalle_prompt, height=160, disabled=True, label_visibility="collapsed")
 
     # ── Adım 2: Görsel Denetim ────────────────────────────────────────────────
     st.markdown("---")
