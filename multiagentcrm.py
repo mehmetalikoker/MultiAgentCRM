@@ -404,16 +404,23 @@ else:
     from ui.tab_gecmisim import render as render_gecmisim
     from ui.tab_kampanya_gorseli import render as render_kampanya_gorseli
 
-    tabs = st.tabs(["📝 Metin Denetimi", "🖼️ Görsel Denetim", "🎨 Kampanya Görseli Oluştur", "⚖️ Hukuk & Strateji Denetimi", "🔀 Karşılaştırmalı Analiz", "🕓 Denetim Geçmişim"])
-    with tabs[0]:
-        render_metin(selected_model, MODELS)
-    with tabs[1]:
-        render_gorsel(selected_model, MODELS, _NON_VISION_MODELS)
-    with tabs[2]:
+    main_tabs = st.tabs(["🎨 Görsel Oluşturma", "🔍 Denetim", "📊 Analiz ve Log"])
+
+    with main_tabs[0]:
         render_kampanya_gorseli(selected_model, MODELS, _NON_VISION_MODELS)
-    with tabs[3]:
-        render_hukuk(selected_model)
-    with tabs[4]:
-        render_karsilastirma(selected_model, MODELS)
-    with tabs[5]:
-        render_gecmisim()
+
+    with main_tabs[1]:
+        denetim_tabs = st.tabs(["📝 Metin Denetimi", "🖼️ Görsel Denetim", "⚖️ Hukuk & Strateji Denetimi"])
+        with denetim_tabs[0]:
+            render_metin(selected_model, MODELS)
+        with denetim_tabs[1]:
+            render_gorsel(selected_model, MODELS, _NON_VISION_MODELS)
+        with denetim_tabs[2]:
+            render_hukuk(selected_model)
+
+    with main_tabs[2]:
+        analiz_tabs = st.tabs(["🔀 Karşılaştırmalı Analiz", "🕓 Denetim Geçmişim"])
+        with analiz_tabs[0]:
+            render_karsilastirma(selected_model, MODELS)
+        with analiz_tabs[1]:
+            render_gecmisim()
