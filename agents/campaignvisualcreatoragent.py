@@ -100,19 +100,32 @@ def generate_image_node(state: CreatorState):
     try:
         from openai import OpenAI
         client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+        # gpt-image-1 is the current model in openai SDK 2.x; returns b64_json by default
         response = client.images.generate(
-            model="dall-e-3",
+            model="gpt-image-1",
             prompt=dalle_prompt,
             size="1024x1024",
             quality="standard",
             n=1,
         )
-        image_url = response.data[0].url
-        img_response = _requests.get(image_url, timeout=60)
-        img_response.raise_for_status()
+        item = response.data[0]
+
+        # Prefer base64 payload; fall back to URL download
+        if getattr(item, "b64_json", None):
+            image_bytes = base64.b64decode(item.b64_json)
+            image_url = ""
+        elif getattr(item, "url", None):
+            img_response = _requests.get(item.url, timeout=60)
+            img_response.raise_for_status()
+            image_bytes = img_response.content
+            image_url = item.url
+        else:
+            return {"generated_image_bytes": None, "error": "API yanıtından görsel alınamadı."}
+
         return {
             "generated_image_url": image_url,
-            "generated_image_bytes": img_response.content,
+            "generated_image_bytes": image_bytes,
             "error": None,
         }
     except Exception as e:
